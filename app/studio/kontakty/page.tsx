@@ -2,7 +2,7 @@ import { AdminPageHeader } from "@/components/admin/page-header";
 import { Button } from "@/components/ui/button";
 import { requireAdmin } from "@/lib/auth";
 import { createSupabaseAdmin } from "@/lib/supabase/admin";
-import { MessagesTable, messagesTableRefreshKey } from "@/components/admin/messages-table";
+import { MessagesTable } from "@/components/admin/messages-table";
 import { SentRepliesTable } from "@/components/admin/sent-replies-table";
 import {
   mapSentRepliesFromSupabase,
@@ -19,6 +19,12 @@ function one(p: string | string[] | undefined): string | undefined {
   if (typeof p === "string") return p;
   if (Array.isArray(p)) return p[0];
   return undefined;
+}
+
+function messagesRefreshKey(messages: ContactMessage[]): string {
+  // Server-safe key pro remount client tabulky po změně dat.
+  // Zahrnuje handled flag, aby se promítly změny stavu bez změny počtu řádků.
+  return `${messages.length}|${messages.map((m) => `${m.id}:${m.handled ? 1 : 0}`).join(",")}`;
 }
 
 export default async function StudioContactsPage({ searchParams }: { searchParams: SP }) {
@@ -91,7 +97,7 @@ export default async function StudioContactsPage({ searchParams }: { searchParam
 
         {tab === "received" ? (
           <MessagesTable
-            key={messagesTableRefreshKey(messages)}
+            key={messagesRefreshKey(messages)}
             messages={messages}
             focusMessageId={focus}
           />
