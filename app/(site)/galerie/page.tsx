@@ -10,6 +10,7 @@ import { PAGINATION } from "@/lib/constants";
 
 export const metadata: Metadata = buildMetadata({
   title: "Galerie",
+  useTitleTemplate: true,
   description: "Kompletní galerie fotografií – koně, portréty, příroda.",
   path: "/galerie",
 });

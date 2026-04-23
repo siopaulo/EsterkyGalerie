@@ -5,16 +5,19 @@ import { fetchPageBySlug } from "@/features/pages/queries";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { Button } from "@/components/ui/button";
 import { buildMetadata } from "@/lib/seo";
+import { getSiteSettings } from "@/features/site-settings/queries";
 import type { PricingItem } from "@/types/database";
 
 export const revalidate = 300;
 
 export async function generateMetadata(): Promise<Metadata> {
-  const data = await fetchPageBySlug("cenik");
+  const [data, settings] = await Promise.all([fetchPageBySlug("cenik"), getSiteSettings()]);
   return buildMetadata({
     title: data?.page.seo_title || data?.page.title || "Ceník",
     description: data?.page.seo_description,
     path: "/cenik",
+    useTitleTemplate: true,
+    siteName: settings.site_name,
   });
 }
 

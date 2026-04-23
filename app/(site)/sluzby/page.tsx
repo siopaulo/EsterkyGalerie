@@ -6,15 +6,18 @@ import { collectPhotoIds } from "@/features/blocks/collect-ids";
 import { fetchPhotosByIds } from "@/features/photos/queries";
 import { Button } from "@/components/ui/button";
 import { buildMetadata } from "@/lib/seo";
+import { getSiteSettings } from "@/features/site-settings/queries";
 
 export const revalidate = 300;
 
 export async function generateMetadata(): Promise<Metadata> {
-  const data = await fetchPageBySlug("sluzby");
+  const [data, settings] = await Promise.all([fetchPageBySlug("sluzby"), getSiteSettings()]);
   return buildMetadata({
     title: data?.page.seo_title || data?.page.title || "Služby",
     description: data?.page.seo_description,
     path: "/sluzby",
+    useTitleTemplate: true,
+    siteName: settings.site_name,
   });
 }
 

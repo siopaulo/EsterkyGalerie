@@ -6,6 +6,7 @@ import { buildMetadata } from "@/lib/seo";
 
 export const metadata: Metadata = buildMetadata({
   title: "Kontakt",
+  useTitleTemplate: true,
   description: "Napište mi. Ráda se ozvu zpět do 48 hodin.",
   path: "/kontakt",
 });

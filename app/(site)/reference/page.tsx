@@ -15,6 +15,7 @@ import { formatDateCs, safeNumber } from "@/lib/utils";
 
 export const metadata: Metadata = buildMetadata({
   title: "Reference",
+  useTitleTemplate: true,
   description:
     "Ohlasy klientů z focení koní, portrétů a životních okamžiků. Přečti si zkušenosti ostatních a podělte se o tu svoji.",
   path: "/reference",

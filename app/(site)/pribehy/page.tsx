@@ -12,6 +12,7 @@ import { PAGINATION } from "@/lib/constants";
 
 export const metadata: Metadata = buildMetadata({
   title: "Příběhy",
+  useTitleTemplate: true,
   description: "Fotografické příběhy z focení – koně, portréty, momenty.",
   path: "/pribehy",
 });

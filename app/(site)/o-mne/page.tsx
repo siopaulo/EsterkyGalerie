@@ -4,17 +4,27 @@ import { BlockRenderer } from "@/features/blocks/render";
 import { collectPhotoIds } from "@/features/blocks/collect-ids";
 import { fetchPhotosByIds } from "@/features/photos/queries";
 import { buildMetadata } from "@/lib/seo";
+import { getSiteSettings } from "@/features/site-settings/queries";
 import { notFound } from "next/navigation";
 
 export const revalidate = 300;
 
 export async function generateMetadata(): Promise<Metadata> {
-  const data = await fetchPageBySlug("o-mne");
-  if (!data) return buildMetadata({ title: "O mně", path: "/o-mne" });
+  const [data, settings] = await Promise.all([fetchPageBySlug("o-mne"), getSiteSettings()]);
+  if (!data) {
+    return buildMetadata({
+      title: "O mně",
+      path: "/o-mne",
+      useTitleTemplate: true,
+      siteName: settings.site_name,
+    });
+  }
   return buildMetadata({
     title: data.page.seo_title || data.page.title,
     description: data.page.seo_description,
     path: "/o-mne",
+    useTitleTemplate: true,
+    siteName: settings.site_name,
   });
 }
 

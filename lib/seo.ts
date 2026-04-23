@@ -4,6 +4,15 @@ import { publicEnv } from "@/lib/env";
 
 export interface BuildMetadataInput {
   title?: string | null;
+  /** Značka pro suffix „Stránka | …“ a pro OpenGraph siteName. Výchozí = SITE_DEFAULTS.name */
+  siteName?: string | null;
+  /** Když je true a `title` je neprázdný, titulek dokumentu je přesně `title` (bez „| značka“). */
+  titleIsAbsolute?: boolean;
+  /**
+   * Když je true a `title` je neprázdný, vrátí se jen segment titulku (např. „Kontakt“) pro sloučení
+   * s `title.template` z nadřazeného layoutu. OG/Twitter použijí plný „title | značka“.
+   */
+  useTitleTemplate?: boolean;
   description?: string | null;
   path?: string;
   image?: string | null;
@@ -12,7 +21,19 @@ export interface BuildMetadataInput {
 }
 
 export function buildMetadata(input: BuildMetadataInput = {}): Metadata {
-  const title = input.title?.trim() || SITE_DEFAULTS.name;
+  const brand = input.siteName?.trim() || SITE_DEFAULTS.name;
+  const rawTitle = input.title?.trim();
+  const ogTitle =
+    rawTitle && !input.titleIsAbsolute ? `${rawTitle} | ${brand}` : rawTitle ? rawTitle : brand;
+
+  const documentTitle: Metadata["title"] =
+    rawTitle && input.useTitleTemplate
+      ? rawTitle
+      : rawTitle && input.titleIsAbsolute
+        ? rawTitle
+        : rawTitle
+          ? `${rawTitle} | ${brand}`
+          : brand;
   const description = input.description?.trim() || SITE_DEFAULTS.description;
   const path = input.path ?? "/";
   const url = absoluteUrl(path);
@@ -20,21 +41,21 @@ export function buildMetadata(input: BuildMetadataInput = {}): Metadata {
 
   return {
     metadataBase: new URL(publicEnv.siteUrl),
-    title: input.title ? `${input.title} | ${SITE_DEFAULTS.name}` : title,
+    title: documentTitle,
     description,
     alternates: { canonical: url },
     openGraph: {
       type: input.type ?? "website",
       locale: SITE_DEFAULTS.locale,
       url,
-      title,
+      title: ogTitle,
       description,
-      siteName: SITE_DEFAULTS.name,
+      siteName: brand,
       images: image ? [{ url: image, width: 1200, height: 630 }] : undefined,
     },
     twitter: {
       card: "summary_large_image",
-      title,
+      title: ogTitle,
       description,
       images: image ? [image] : undefined,
     },

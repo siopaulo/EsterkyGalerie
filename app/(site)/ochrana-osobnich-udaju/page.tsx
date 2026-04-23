@@ -4,16 +4,19 @@ import { BlockRenderer } from "@/features/blocks/render";
 import { collectPhotoIds } from "@/features/blocks/collect-ids";
 import { fetchPhotosByIds } from "@/features/photos/queries";
 import { buildMetadata } from "@/lib/seo";
+import { getSiteSettings } from "@/features/site-settings/queries";
 
 export const revalidate = 600;
 
 export async function generateMetadata(): Promise<Metadata> {
-  const data = await fetchPageBySlug("ochrana-osobnich-udaju");
+  const [data, settings] = await Promise.all([fetchPageBySlug("ochrana-osobnich-udaju"), getSiteSettings()]);
   return buildMetadata({
     title: data?.page.seo_title || data?.page.title || "Ochrana osobních údajů",
     description: data?.page.seo_description,
     path: "/ochrana-osobnich-udaju",
     noIndex: false,
+    useTitleTemplate: true,
+    siteName: settings.site_name,
   });
 }
 

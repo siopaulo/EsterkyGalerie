@@ -1,19 +1,10 @@
-import type { Metadata } from "next";
 import { BlockRenderer } from "@/features/blocks/render";
 import { collectPhotoIds } from "@/features/blocks/collect-ids";
 import { getSiteSettings } from "@/features/site-settings/queries";
 import { fetchPhotosByIds } from "@/features/photos/queries";
 import { fetchStories } from "@/features/stories/queries";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
-import { buildMetadata } from "@/lib/seo";
 import type { Photo, PageBlock } from "@/types/database";
-
-export const metadata: Metadata = buildMetadata({
-  title: null,
-  description:
-    "Editorial foto portfolio Esterky Fotky. Koně, portréty, příroda – tiché okamžiky zachycené s citem.",
-  path: "/",
-});
 
 export const revalidate = 120;
 

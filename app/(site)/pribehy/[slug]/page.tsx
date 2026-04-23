@@ -8,6 +8,7 @@ import { collectPhotoIds } from "@/features/blocks/collect-ids";
 import { fetchStoryBySlug, fetchRelatedStories } from "@/features/stories/queries";
 import { fetchPhotosByIds } from "@/features/photos/queries";
 import { buildMetadata, jsonLd } from "@/lib/seo";
+import { getSiteSettings } from "@/features/site-settings/queries";
 import { formatDateCs } from "@/lib/utils";
 import { cldUrlOrNull } from "@/lib/cloudinary-url";
 
@@ -17,8 +18,8 @@ type Params = Promise<{ slug: string }>;
 
 export async function generateMetadata({ params }: { params: Params }): Promise<Metadata> {
   const { slug } = await params;
-  const data = await fetchStoryBySlug(slug);
-  if (!data) return buildMetadata({ title: "Příběh nenalezen", noIndex: true });
+  const [data, settings] = await Promise.all([fetchStoryBySlug(slug), getSiteSettings()]);
+  if (!data) return buildMetadata({ title: "Příběh nenalezen", noIndex: true, titleIsAbsolute: true });
   const ogImage = cldUrlOrNull(data.cover?.cloudinary_public_id, {
     width: 1200,
     height: 630,
@@ -31,6 +32,8 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
     path: `/pribehy/${data.story.slug}`,
     type: "article",
     image: ogImage,
+    useTitleTemplate: true,
+    siteName: settings.site_name,
   });
 }
 

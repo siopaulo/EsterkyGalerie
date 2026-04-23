@@ -12,6 +12,7 @@ export default async function DashboardPage() {
   const [
     { count: photoCount },
     { count: storyCount },
+    { count: pageCount },
     { count: unread },
     { count: pendingReviews },
     { data: recentMessages },
@@ -19,6 +20,7 @@ export default async function DashboardPage() {
   ] = await Promise.all([
     supabase.from("photos").select("id", { count: "exact", head: true }).is("deleted_at", null),
     supabase.from("stories").select("id", { count: "exact", head: true }),
+    supabase.from("pages").select("id", { count: "exact", head: true }),
     supabase.from("contact_messages").select("id", { count: "exact", head: true }).eq("handled", false),
     supabase.from("reviews").select("id", { count: "exact", head: true }).eq("approved", false),
     supabase.from("contact_messages").select("id, name, email, subject, created_at, handled").order("created_at", { ascending: false }).limit(5),
@@ -53,7 +55,7 @@ export default async function DashboardPage() {
         <Stat label="Příběhy" value={storyCount ?? 0} href="/studio/pribehy" />
         <Stat label="Nové zprávy" value={unread ?? 0} href="/studio/kontakty" tone="accent" />
         <Stat label="Reference ke schválení" value={pendingReviews ?? 0} href="/studio/recenze" tone={pendingReviews && pendingReviews > 0 ? "accent" : undefined} />
-        <Stat label="Stránky" value={5} href="/studio/stranky" />
+        <Stat label="Stránky" value={pageCount ?? 0} href="/studio/stranky" />
       </div>
 
       <div className="grid gap-6 px-6 pb-10 md:grid-cols-2 md:px-10">

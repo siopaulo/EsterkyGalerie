@@ -3,7 +3,7 @@ import Script from "next/script";
 import { Cormorant_Garamond, Inter } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "@/components/ui/toast";
-import { buildMetadata, jsonLd } from "@/lib/seo";
+import { jsonLd } from "@/lib/seo";
 import { publicEnv } from "@/lib/env";
 import { getSiteSettings } from "@/features/site-settings/queries";
 
@@ -21,7 +21,9 @@ const cormorant = Cormorant_Garamond({
   weight: ["400", "500", "600"],
 });
 
-export const metadata: Metadata = buildMetadata({});
+export async function generateMetadata(): Promise<Metadata> {
+  return { metadataBase: new URL(publicEnv.siteUrl) };
+}
 
 export const viewport: Viewport = {
   themeColor: "#fbf8f3",

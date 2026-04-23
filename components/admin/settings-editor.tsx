@@ -40,7 +40,7 @@ export function SettingsEditor({ settings, availablePhotos, availableStories }: 
   async function save() {
     setSaving(true);
     try {
-      await updateSiteSettingsAction({
+      const res = await updateSiteSettingsAction({
         site_name: values.site_name,
         site_tagline: values.site_tagline,
         default_seo_title: values.default_seo_title,
@@ -55,10 +55,15 @@ export function SettingsEditor({ settings, availablePhotos, availableStories }: 
         featured_story_ids: values.featured_story_ids,
         // hero_texts záměrně neposíláme – edituje se přes moduly homepage.
       });
+      if (!res.ok) {
+        const extra = res.fields ? Object.values(res.fields).filter(Boolean) : [];
+        toast.error([res.error, ...extra].slice(0, 4).join(" "));
+        return;
+      }
       toast.success("Nastavení uloženo.");
       router.refresh();
     } catch (err) {
-      toast.error((err as Error).message);
+      toast.error(err instanceof Error ? err.message : "Uložení selhalo.");
     } finally {
       setSaving(false);
     }
