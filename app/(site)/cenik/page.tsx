@@ -4,7 +4,7 @@ import { Check } from "lucide-react";
 import { fetchPageBySlug } from "@/features/pages/queries";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { Button } from "@/components/ui/button";
-import { buildMetadata } from "@/lib/seo";
+import { buildMetadata, resolveSiteBrand } from "@/lib/seo";
 import { getSiteSettings } from "@/features/site-settings/queries";
 import type { PricingItem } from "@/types/database";
 
@@ -12,12 +12,14 @@ export const revalidate = 300;
 
 export async function generateMetadata(): Promise<Metadata> {
   const [data, settings] = await Promise.all([fetchPageBySlug("cenik"), getSiteSettings()]);
+  const brand = resolveSiteBrand(settings.site_name);
+  const segment = data?.page.seo_title || data?.page.title || "Ceník";
   return buildMetadata({
-    title: data?.page.seo_title || data?.page.title || "Ceník",
+    title: `${segment} | ${brand}`,
+    titleIsAbsolute: true,
     description: data?.page.seo_description,
     path: "/cenik",
-    useTitleTemplate: true,
-    siteName: settings.site_name,
+    siteName: brand,
   });
 }
 

@@ -3,20 +3,22 @@ import { fetchPageBySlug } from "@/features/pages/queries";
 import { BlockRenderer } from "@/features/blocks/render";
 import { collectPhotoIds } from "@/features/blocks/collect-ids";
 import { fetchPhotosByIds } from "@/features/photos/queries";
-import { buildMetadata } from "@/lib/seo";
+import { buildMetadata, resolveSiteBrand } from "@/lib/seo";
 import { getSiteSettings } from "@/features/site-settings/queries";
 
 export const revalidate = 600;
 
 export async function generateMetadata(): Promise<Metadata> {
   const [data, settings] = await Promise.all([fetchPageBySlug("ochrana-osobnich-udaju"), getSiteSettings()]);
+  const brand = resolveSiteBrand(settings.site_name);
+  const segment = data?.page.seo_title || data?.page.title || "Ochrana osobních údajů";
   return buildMetadata({
-    title: data?.page.seo_title || data?.page.title || "Ochrana osobních údajů",
+    title: `${segment} | ${brand}`,
+    titleIsAbsolute: true,
     description: data?.page.seo_description,
     path: "/ochrana-osobnich-udaju",
     noIndex: false,
-    useTitleTemplate: true,
-    siteName: settings.site_name,
+    siteName: brand,
   });
 }
 

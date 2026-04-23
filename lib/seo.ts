@@ -2,6 +2,11 @@ import type { Metadata } from "next";
 import { SITE_DEFAULTS } from "@/lib/constants";
 import { publicEnv } from "@/lib/env";
 
+/** Název značky z nastavení webu; fallback na výchozí název z konstant. */
+export function resolveSiteBrand(siteName?: string | null): string {
+  return siteName?.trim() || SITE_DEFAULTS.name;
+}
+
 export interface BuildMetadataInput {
   title?: string | null;
   /** Značka pro suffix „Stránka | …“ a pro OpenGraph siteName. Výchozí = SITE_DEFAULTS.name */
@@ -21,7 +26,7 @@ export interface BuildMetadataInput {
 }
 
 export function buildMetadata(input: BuildMetadataInput = {}): Metadata {
-  const brand = input.siteName?.trim() || SITE_DEFAULTS.name;
+  const brand = resolveSiteBrand(input.siteName);
   const rawTitle = input.title?.trim();
   const ogTitle =
     rawTitle && !input.titleIsAbsolute ? `${rawTitle} | ${brand}` : rawTitle ? rawTitle : brand;
