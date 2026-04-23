@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useRef, useState } from "react";
+import { useMemo, useState } from "react";
 import { Trash2, ChevronUp, ChevronDown, Plus, AlertTriangle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -19,31 +19,21 @@ import { Checkbox } from "@/components/ui/checkbox";
 
 export interface BlockDraft {
   id?: string;
+  /** Klient-only stabilní klíč pro React; na server se neposílá (viz save v editorech). */
+  clientRowKey?: string;
   block_type: BlockType;
   payload: Record<string, unknown>;
 }
 
-/**
- * Stabilní klientský klíč pro draft bloku.
- * Pokud blok přišel z DB, má ID. Nové bloky dostanou lokální UUID,
- * aby React neztrácel focus při reorderu a přidávání nových bloků.
- */
-function useStableKeys(value: BlockDraft[]): string[] {
-  const keysRef = useRef(new WeakMap<BlockDraft, string>());
-  return useMemo(() => {
-    const map = keysRef.current;
-    return value.map((b) => {
-      if (b.id) return b.id;
-      const existing = map.get(b);
-      if (existing) return existing;
-      const k =
-        typeof crypto !== "undefined" && "randomUUID" in crypto
-          ? crypto.randomUUID()
-          : Math.random().toString(36).slice(2);
-      map.set(b, k);
-      return k;
-    });
-  }, [value]);
+function blockRowKey(b: BlockDraft, index: number): string {
+  return b.id ?? b.clientRowKey ?? `idx-${index}`;
+}
+
+/** Odstraní `clientRowKey` před uložením na server (akce serializují jen DB pole). */
+export function blocksWithoutClientKeys(
+  blocks: BlockDraft[],
+): Array<Omit<BlockDraft, "clientRowKey">> {
+  return blocks.map(({ clientRowKey: _k, ...rest }) => rest);
 }
 
 interface BlockEditorProps {
@@ -115,7 +105,6 @@ const DEFAULT_PAYLOAD: Record<BlockType, Record<string, unknown>> = {
 
 export function BlockEditor({ value, onChange, photos, allowedTypes }: BlockEditorProps) {
   const photoMap = useMemo(() => new Map(photos.map((p) => [p.id, p])), [photos]);
-  const keys = useStableKeys(value);
   const addableTypes = allowedTypes ?? BLOCK_TYPES;
 
   function update(i: number, next: BlockDraft) {
@@ -136,7 +125,13 @@ export function BlockEditor({ value, onChange, photos, allowedTypes }: BlockEdit
     onChange(copy);
   }
   function addBlock(type: BlockType) {
-    const next: BlockDraft = { block_type: type, payload: structuredClone(DEFAULT_PAYLOAD[type]) };
+    const clientRowKey =
+      typeof crypto !== "undefined" && "randomUUID" in crypto ? crypto.randomUUID() : `row-${Date.now()}`;
+    const next: BlockDraft = {
+      block_type: type,
+      payload: structuredClone(DEFAULT_PAYLOAD[type]),
+      clientRowKey,
+    };
     onChange([...value, next]);
   }
 
@@ -153,7 +148,7 @@ export function BlockEditor({ value, onChange, photos, allowedTypes }: BlockEdit
           const invalid = !parsed.ok;
           return (
             <div
-              key={keys[i]}
+              key={blockRowKey(b, i)}
               className={`rounded-lg border bg-background p-5 shadow-sm ${invalid ? "border-red-400" : "border-border"}`}
             >
               <div className="mb-4 flex items-center justify-between gap-3">

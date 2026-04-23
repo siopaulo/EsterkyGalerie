@@ -3,15 +3,15 @@
  * Žádné secrets – pouze veřejný cloud name.
  */
 import { publicEnv } from "@/lib/env";
+import { log } from "@/lib/logger";
 
 const CLOUD_NAME = publicEnv.cloudinaryCloudName;
 const PLACEHOLDER = "/placeholder.svg";
 
 if (typeof window !== "undefined" && !CLOUD_NAME) {
-  // eslint-disable-next-line no-console
-  console.warn(
-    "[cloudinary] NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME není nastaveno. " +
-      "Obrázky se nezobrazí – přidej proměnnou do .env.local a restartuj dev server.",
+  log(
+    "warn",
+    "cloudinary: NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME missing – images will not load; set in .env.local and restart dev",
   );
 }
 

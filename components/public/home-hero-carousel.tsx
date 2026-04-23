@@ -44,11 +44,18 @@ export function HomeHeroCarousel({ photos, autoPlayMs = 5000 }: HomeHeroCarousel
   const goNext = () => setIndex((i) => (i + 1) % safe.length);
 
   function onTouchStart(e: TouchEvent) {
-    touchStartX.current = e.touches[0].clientX;
+    const t = e.touches[0];
+    if (!t) return;
+    touchStartX.current = t.clientX;
   }
   function onTouchEnd(e: TouchEvent) {
     if (touchStartX.current == null || safe.length <= 1) return;
-    const dx = e.changedTouches[0].clientX - touchStartX.current;
+    const t = e.changedTouches[0];
+    if (!t) {
+      touchStartX.current = null;
+      return;
+    }
+    const dx = t.clientX - touchStartX.current;
     touchStartX.current = null;
     if (Math.abs(dx) < 40) return;
     if (dx < 0) goNext();

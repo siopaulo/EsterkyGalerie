@@ -6,7 +6,7 @@ import { publicEnv } from "@/lib/env";
  * Middleware helper – refresh session + redirect na login pro /studio.
  */
 export async function updateSession(request: NextRequest) {
-  let response = NextResponse.next({ request });
+  const response = NextResponse.next({ request });
 
   const supabase = createServerClient(publicEnv.supabaseUrl, publicEnv.supabaseAnonKey, {
     cookies: {

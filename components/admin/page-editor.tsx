@@ -8,11 +8,12 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { BlockEditor, type BlockDraft } from "@/components/admin/block-editor";
+import { BlockEditor, blocksWithoutClientKeys, type BlockDraft } from "@/components/admin/block-editor";
 import { updatePageMetaAction, savePageBlocksAction } from "@/features/pages/actions";
 import type { Page, PageBlock } from "@/types/database";
 import { HOME_BLOCK_TYPES, NON_HOME_BLOCK_TYPES, type BlockType } from "@/features/blocks/schemas";
 import type { PhotoLite } from "@/components/admin/photo-picker";
+import { log } from "@/lib/logger";
 
 interface PageEditorProps {
   page: Page;
@@ -44,11 +45,13 @@ export function PageEditor({ page, blocks: initialBlocks, availablePhotos }: Pag
         seo_title: seoTitle || null,
         seo_description: seoDescription || null,
       });
-      await savePageBlocksAction(page.id, blocks);
+      await savePageBlocksAction(page.id, blocksWithoutClientKeys(blocks));
       toast.success("Stránka uložena.");
       router.refresh();
     } catch (err) {
-      console.error(err);
+      log("error", "page-editor save failed", {
+        err: err instanceof Error ? err.message : String(err),
+      });
       toast.error((err as Error).message || "Uložení selhalo.");
     }
   }

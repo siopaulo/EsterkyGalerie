@@ -11,7 +11,7 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { ConfirmDialog } from "@/components/admin/confirm-dialog";
 import { PhotoPicker, PhotoChip, type PhotoLite } from "@/components/admin/photo-picker";
-import { BlockEditor, type BlockDraft } from "@/components/admin/block-editor";
+import { BlockEditor, blocksWithoutClientKeys, type BlockDraft } from "@/components/admin/block-editor";
 import { slugify } from "@/lib/slug";
 import {
   upsertStoryAction,
@@ -20,6 +20,7 @@ import {
 } from "@/features/stories/actions";
 import type { Story, StoryBlock, Tag } from "@/types/database";
 import { NON_HOME_BLOCK_TYPES, type BlockType } from "@/features/blocks/schemas";
+import { log } from "@/lib/logger";
 
 interface StoryEditorProps {
   story: Story;
@@ -75,11 +76,13 @@ export function StoryEditor({
         seo_description: seoDescription || null,
         tag_slugs: selectedTagSlugs,
       });
-      await saveStoryBlocksAction(story.id, blocks);
+      await saveStoryBlocksAction(story.id, blocksWithoutClientKeys(blocks));
       toast.success("Příběh uložen.");
       startTransition(() => router.refresh());
     } catch (err) {
-      console.error(err);
+      log("error", "story-editor save failed", {
+        err: err instanceof Error ? err.message : String(err),
+      });
       toast.error((err as Error).message || "Uložení selhalo.");
     }
   }
@@ -90,7 +93,9 @@ export function StoryEditor({
       toast.success("Příběh smazán.");
       router.push("/studio/pribehy");
     } catch (err) {
-      console.error(err);
+      log("error", "story-editor delete failed", {
+        err: err instanceof Error ? err.message : String(err),
+      });
       toast.error("Smazání selhalo.");
     }
   }

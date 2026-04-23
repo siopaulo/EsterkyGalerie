@@ -13,6 +13,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge";
 import { ConfirmDialog } from "@/components/admin/confirm-dialog";
 import { upsertPhotoAction, softDeletePhotoAction } from "@/features/photos/actions";
+import { log } from "@/lib/logger";
 import type { Photo, Tag } from "@/types/database";
 
 interface PhotoEditorProps {
@@ -68,7 +69,9 @@ export function PhotoEditor({ photo, initialTagSlugs, availableTags, usage }: Ph
       toast.success("Uloženo.");
       startTransition(() => router.refresh());
     } catch (err) {
-      console.error(err);
+      log("error", "photo-editor save failed", {
+        err: err instanceof Error ? err.message : String(err),
+      });
       toast.error(err instanceof Error ? err.message : "Uložení selhalo.");
     } finally {
       setSaving(false);
@@ -83,7 +86,9 @@ export function PhotoEditor({ photo, initialTagSlugs, availableTags, usage }: Ph
       toast.success("Fotka smazána.");
       router.push("/studio/galerie");
     } catch (err) {
-      console.error(err);
+      log("error", "photo-editor delete failed", {
+        err: err instanceof Error ? err.message : String(err),
+      });
       toast.error(err instanceof Error ? err.message : "Smazání selhalo.");
       setDeleting(false);
       throw err;

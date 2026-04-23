@@ -29,6 +29,7 @@ export function ReviewForm() {
   });
 
   const handleToken = useCallback((t: string) => setToken(t), []);
+  // eslint-disable-next-line react-hooks/incompatible-library -- RHF watch pro hvězdy
   const rating = form.watch("rating") as number | undefined;
 
   const onSubmit = async (values: ReviewInput) => {

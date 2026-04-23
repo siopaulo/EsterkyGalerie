@@ -54,6 +54,8 @@ Web poběží na `http://localhost:3000`, studio na `http://localhost:3000/studi
 
 ## Sentry (volitelné)
 
+Projekt používá `@sentry/nextjs` **10.x** (oficiální podpora **Next.js 16**). Starší řada 9.x hlásí nesplněný peer dependency u Next 16.
+
 1. Založ účet na [sentry.io](https://sentry.io), vytvoř projekt typu **Next.js**.
 2. Z **Settings → Client Keys (DSN)** zkopíruj DSN do `.env.local` jako `NEXT_PUBLIC_SENTRY_DSN` (a případně `SENTRY_DSN`, pokud chceš oddělit server – často stačí jen veřejná proměnná).
 3. Nastav `SENTRY_ENVIRONMENT` (např. `production`) kvůli filtrování v dashboardu.
@@ -153,15 +155,18 @@ Block engine v `features/blocks/` definuje:
 ## Deployment na Netlify
 
 1. Připoj repozitář.
-2. Nastav build command `pnpm build`, publish dir `.next` (plugin `@netlify/plugin-nextjs` doplní runtime).
+2. V repu je `netlify.toml`: build **`pnpm typecheck && pnpm build`**, publish `.next` (plugin `@netlify/plugin-nextjs` doplní runtime). Typecheck před buildem chytí TS chyby dřív než dlouhá kompilace.
 3. Do Netlify env proměnných přidej všechny položky z `.env.example`.
 4. Po prvním deployi nastav doménu (Cloudflare) → Netlify.
 5. Pokud používáš vlastní doménu, aktualizuj `NEXT_PUBLIC_SITE_URL` na finální URL.
+
+**Kontrola před releasem:** viz [docs/deploy-checklist.md](docs/deploy-checklist.md) (Supabase joiny, peer deps, env).
 
 ## Skripty
 
 ```
 pnpm dev          # lokální server
+pnpm verify       # typecheck + lint (doporučeno před pushnutím)
 pnpm build        # produkční build
 pnpm start        # produkční server
 pnpm lint         # ESLint

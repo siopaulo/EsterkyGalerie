@@ -68,7 +68,6 @@ export default async function ReferencePage({ searchParams }: ReferencePageProps
         <Script
           id="reviews-aggregate-rating"
           type="application/ld+json"
-          // eslint-disable-next-line react/no-danger
           dangerouslySetInnerHTML={structured}
         />
       ) : null}

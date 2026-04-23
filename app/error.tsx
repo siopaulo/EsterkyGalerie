@@ -2,7 +2,9 @@
 
 import { useEffect } from "react";
 import Link from "next/link";
+import * as Sentry from "@sentry/nextjs";
 import { Button } from "@/components/ui/button";
+import { log } from "@/lib/logger";
 
 export default function Error({
   error,
@@ -12,7 +14,11 @@ export default function Error({
   reset: () => void;
 }) {
   useEffect(() => {
-    console.error("[app-error]", error);
+    Sentry.captureException(error);
+    log("error", "app route error boundary", {
+      digest: error.digest,
+      message: error.message,
+    });
   }, [error]);
 
   return (

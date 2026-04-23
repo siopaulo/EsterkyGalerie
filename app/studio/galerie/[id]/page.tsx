@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import { AdminPageHeader } from "@/components/admin/page-header";
 import { PhotoEditor } from "@/components/admin/photo-editor";
 import { requireAdmin } from "@/lib/auth";
@@ -42,10 +43,14 @@ export default async function PhotoDetail({ params }: { params: Params }) {
       />
       <section className="grid gap-10 px-6 py-8 md:grid-cols-[1fr_420px] md:px-10">
         <div className="overflow-hidden rounded-md border border-border bg-muted">
-          <img
+          <Image
             src={cldUrl((photo as Photo).cloudinary_public_id, { width: 1200 })}
             alt={(photo as Photo).alt_text || (photo as Photo).display_name}
+            width={Math.max(1, (photo as Photo).width ?? 1200)}
+            height={Math.max(1, (photo as Photo).height ?? 800)}
             className="h-auto w-full object-contain"
+            sizes="(min-width: 768px) 50vw, 100vw"
+            priority
           />
           <div className="border-t border-border bg-background p-4 text-xs text-muted-foreground">
             <p>

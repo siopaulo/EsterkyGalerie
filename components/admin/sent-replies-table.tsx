@@ -3,16 +3,9 @@
 import { Fragment, useState } from "react";
 import Link from "next/link";
 import { formatDateCs } from "@/lib/utils";
+import type { SentReplyRow } from "@/features/contact/sent-replies";
 
-export type SentReplyRow = {
-  id: string;
-  contact_message_id: string | null;
-  to_email: string;
-  subject: string;
-  body: string;
-  created_at: string;
-  contact_messages: { name: string; subject: string | null; message: string } | null;
-};
+export type { SentReplyRow } from "@/features/contact/sent-replies";
 
 export function SentRepliesTable({ rows }: { rows: SentReplyRow[] }) {
   const [open, setOpen] = useState<string | null>(null);

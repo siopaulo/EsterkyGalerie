@@ -13,6 +13,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
 import { cldUrl } from "@/lib/cloudinary-url";
+import { log } from "@/lib/logger";
 import { upsertPhotoAction } from "@/features/photos/actions";
 import type { Tag } from "@/types/database";
 
@@ -125,7 +126,9 @@ export function PhotoUploader({ availableTags, triggerLabel = "Nahrát fotku", a
       );
       setStage("meta");
     } catch (err) {
-      console.error(err);
+      log("error", "photo-uploader upload failed", {
+        err: err instanceof Error ? err.message : String(err),
+      });
       toast.error("Nahrání selhalo. Zkuste to znovu.");
       setStage("pick");
     }
@@ -155,7 +158,9 @@ export function PhotoUploader({ availableTags, triggerLabel = "Nahrát fotku", a
       setOpen(false);
       router.refresh();
     } catch (err) {
-      console.error(err);
+      log("error", "photo-uploader save failed", {
+        err: err instanceof Error ? err.message : String(err),
+      });
       toast.error(err instanceof Error ? err.message : "Uložení selhalo.");
     } finally {
       setSaving(false);

@@ -1,6 +1,7 @@
 import type { MetadataRoute } from "next";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { publicEnv } from "@/lib/env";
+import { log } from "@/lib/logger";
 
 const STATIC = [
   { path: "/", priority: 1.0 },
@@ -43,7 +44,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       });
     }
   } catch (err) {
-    console.warn("[sitemap] nepodařilo se načíst příběhy", err);
+    log("warn", "sitemap: stories fetch failed", { err: String(err) });
   }
 
   return items;

@@ -1,6 +1,7 @@
 import "server-only";
 import { v2 as cloudinary } from "cloudinary";
 import { serverEnv } from "@/lib/env";
+import { log } from "@/lib/logger";
 
 let configured = false;
 
@@ -40,7 +41,7 @@ export async function deleteFromCloudinary(publicId: string) {
   try {
     await cloudinary.uploader.destroy(publicId, { invalidate: true });
   } catch (err) {
-    console.error("[cloudinary] destroy failed", publicId, err);
+    log("error", "cloudinary: destroy failed", { publicId, err: String(err) });
   }
 }
 

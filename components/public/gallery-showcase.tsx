@@ -129,7 +129,7 @@ function EditorialLayout({ photos, autoPlayMs }: { photos: Photo[]; autoPlayMs: 
               key={i}
               type="button"
               aria-label={`Zobrazit sadu ${i + 1}`}
-              aria-selected={i === index}
+              aria-pressed={i === index}
               onClick={() => goTo(i)}
               className={cn(
                 "h-[3px] rounded-full transition-all",
@@ -191,7 +191,7 @@ function FadeLayout({ photos, autoPlayMs }: { photos: Photo[]; autoPlayMs: numbe
               key={i}
               type="button"
               aria-label={`Fotka ${i + 1}`}
-              aria-selected={i === index}
+              aria-pressed={i === index}
               onClick={() => goTo(i)}
               className={cn(
                 "h-[3px] rounded-full transition-all",
@@ -297,11 +297,18 @@ function useAutoplay(total: number, autoPlayMs: number) {
     onFocusCapture: () => setPaused(true),
     onBlurCapture: () => setPaused(false),
     onTouchStart: (e: TouchEvent) => {
-      touchStartX.current = e.touches[0].clientX;
+      const t = e.touches[0];
+      if (!t) return;
+      touchStartX.current = t.clientX;
     },
     onTouchEnd: (e: TouchEvent) => {
       if (touchStartX.current == null || total <= 1) return;
-      const dx = e.changedTouches[0].clientX - touchStartX.current;
+      const t = e.changedTouches[0];
+      if (!t) {
+        touchStartX.current = null;
+        return;
+      }
+      const dx = t.clientX - touchStartX.current;
       touchStartX.current = null;
       if (Math.abs(dx) < 48) return;
       setIndex((cur) => (dx < 0 ? (cur + 1) % total : (cur - 1 + total) % total));

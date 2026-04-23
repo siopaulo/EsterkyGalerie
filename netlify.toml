@@ -1,5 +1,6 @@
 [build]
-  command = "pnpm build"
+  # typecheck před buildem – stejné chyby jako lokálně `pnpm typecheck`, dřív než dlouhý next build
+  command = "pnpm typecheck && pnpm build"
   publish = ".next"
 
 [build.environment]

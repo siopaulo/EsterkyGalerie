@@ -38,14 +38,14 @@ export async function updatePageMetaAction(input: z.infer<typeof pageSchema>) {
   return { ok: true };
 }
 
-const blockInputSchema = z.object({
+const _blockInputSchema = z.object({
   id: z.string().uuid().optional(),
   block_type: z.string(),
   sort_order: z.number().int().optional(),
   payload: z.unknown(),
 });
 
-export async function savePageBlocksAction(pageId: string, blocks: z.infer<typeof blockInputSchema>[]) {
+export async function savePageBlocksAction(pageId: string, blocks: z.infer<typeof _blockInputSchema>[]) {
   await requireAdmin();
   const admin = createSupabaseAdmin();
   for (const b of blocks) {

@@ -2,8 +2,13 @@ import { AdminPageHeader } from "@/components/admin/page-header";
 import { Button } from "@/components/ui/button";
 import { requireAdmin } from "@/lib/auth";
 import { createSupabaseAdmin } from "@/lib/supabase/admin";
-import { MessagesTable } from "@/components/admin/messages-table";
-import { SentRepliesTable, type SentReplyRow } from "@/components/admin/sent-replies-table";
+import { MessagesTable, messagesTableRefreshKey } from "@/components/admin/messages-table";
+import { SentRepliesTable } from "@/components/admin/sent-replies-table";
+import {
+  mapSentRepliesFromSupabase,
+  type SentReplyRow,
+  type SentReplySupabaseRow,
+} from "@/features/contact/sent-replies";
 import type { ContactMessage } from "@/types/database";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
@@ -42,7 +47,7 @@ export default async function StudioContactsPage({ searchParams }: { searchParam
       )
       .order("created_at", { ascending: false })
       .limit(300);
-    replies = (data ?? []) as SentReplyRow[];
+    replies = mapSentRepliesFromSupabase(data as SentReplySupabaseRow[] | null);
   }
 
   return (
@@ -85,7 +90,11 @@ export default async function StudioContactsPage({ searchParams }: { searchParam
         </div>
 
         {tab === "received" ? (
-          <MessagesTable messages={messages} focusMessageId={focus} />
+          <MessagesTable
+            key={messagesTableRefreshKey(messages)}
+            messages={messages}
+            focusMessageId={focus}
+          />
         ) : (
           <SentRepliesTable rows={replies} />
         )}

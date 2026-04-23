@@ -15,7 +15,7 @@ interface HeaderProps {
 
 export function PublicHeader({ siteName, tagline }: HeaderProps) {
   const pathname = usePathname();
-  const [open, setOpen] = useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
 
   useEffect(() => {
@@ -25,7 +25,11 @@ export function PublicHeader({ siteName, tagline }: HeaderProps) {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  useEffect(() => setOpen(false), [pathname]);
+  useEffect(() => {
+    // Zavřít mobilní menu při změně URL (back/forward i programová navigace).
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- jediný řádek, žádná kaskáda s jiným stavem
+    setMobileOpen(false);
+  }, [pathname]);
 
   return (
     <header
@@ -108,15 +112,15 @@ export function PublicHeader({ siteName, tagline }: HeaderProps) {
         <button
           type="button"
           className="lg:hidden -mr-2 inline-flex h-10 w-10 items-center justify-center rounded-md text-foreground hover:bg-muted transition-colors"
-          aria-label={open ? "Zavřít menu" : "Otevřít menu"}
-          aria-expanded={open}
-          onClick={() => setOpen((v) => !v)}
+          aria-label={mobileOpen ? "Zavřít menu" : "Otevřít menu"}
+          aria-expanded={mobileOpen}
+          onClick={() => setMobileOpen((v) => !v)}
         >
-          {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+          {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
         </button>
       </div>
 
-      {open && (
+      {mobileOpen ? (
         <div className="lg:hidden border-t border-border bg-background">
           <nav aria-label="Mobilní navigace" className="container-site py-4">
             <ul className="flex flex-col gap-1">
@@ -133,6 +137,7 @@ export function PublicHeader({ siteName, tagline }: HeaderProps) {
                           ? "bg-muted text-foreground"
                           : "text-foreground/80 hover:bg-muted hover:text-foreground",
                       )}
+                      onClick={() => setMobileOpen(false)}
                     >
                       {item.label}
                     </Link>
@@ -142,7 +147,7 @@ export function PublicHeader({ siteName, tagline }: HeaderProps) {
             </ul>
           </nav>
         </div>
-      )}
+      ) : null}
     </header>
   );
 }

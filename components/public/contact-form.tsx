@@ -120,6 +120,7 @@ export function ContactForm() {
       <div className="flex items-start gap-3">
         <Checkbox
           id="consent"
+          // eslint-disable-next-line react-hooks/incompatible-library -- RHF watch u checkboxu
           checked={form.watch("consent") as unknown as boolean}
           onCheckedChange={(v) => form.setValue("consent", (v === true) as unknown as true, { shouldValidate: true })}
         />

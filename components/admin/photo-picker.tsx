@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { Check, Search, X } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -55,15 +55,6 @@ export function PhotoPicker({
 
   const [working, setWorking] = useState<Set<string>>(() => new Set(committed));
 
-  // Každé otevření dialogu = čistý stav odvozený z committed výběru.
-  // Tím řešíme „cache z minulé neuložené relace“.
-  useEffect(() => {
-    if (open) {
-      setWorking(new Set(committed));
-      setQ("");
-    }
-  }, [open, committed]);
-
   const filtered = useMemo(() => {
     const s = q.trim().toLowerCase();
     if (!s) return photos;
@@ -116,7 +107,16 @@ export function PhotoPicker({
           {label}
         </Button>
       )}
-      <Dialog open={open} onOpenChange={setOpen}>
+      <Dialog
+        open={open}
+        onOpenChange={(next) => {
+          setOpen(next);
+          if (next) {
+            setWorking(new Set(committed));
+            setQ("");
+          }
+        }}
+      >
         <DialogContent className="max-w-3xl max-h-[85vh] overflow-hidden">
           <DialogHeader>
             <DialogTitle>{label}</DialogTitle>

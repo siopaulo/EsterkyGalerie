@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect } from "react";
 import { ChevronLeft, ChevronRight, X } from "lucide-react";
 import { cldUrl, FULL_WIDTHS, cldSrcSet } from "@/lib/cloudinary-url";
 import type { PhotoWithTags } from "@/types/database";
@@ -79,6 +79,8 @@ export function Lightbox({ photos, index, onClose, onIndexChange }: LightboxProp
       </button>
 
       <figure className="flex max-h-[90vh] max-w-[95vw] flex-col items-center">
+        {/* Vlastní srcSet pro Cloudinary – next/image by šablonu nezjednodušil. */}
+        {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           key={photo.id}
           src={cldUrl(photo.cloudinary_public_id, { width: 1800, quality: "auto:best" })}

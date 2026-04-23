@@ -1,6 +1,6 @@
 "use client";
 
-import { Fragment, useEffect, useMemo, useState } from "react";
+import { Fragment, useLayoutEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { CheckCircle2, Reply, RotateCcw, Trash2 } from "lucide-react";
 import { toast } from "sonner";
@@ -18,6 +18,11 @@ import type { ContactMessage } from "@/types/database";
 
 type StatusFilter = "all" | "new" | "handled";
 
+/** Klíč pro remount tabulky po `router.refresh()` – nahrazuje sync `initial` přes effect. */
+export function messagesTableRefreshKey(messages: ContactMessage[]): string {
+  return `${messages.length}|${messages.map((m) => `${m.id}:${m.handled ? 1 : 0}`).join(":")}`;
+}
+
 export function MessagesTable({
   messages: initial,
   focusMessageId,
@@ -26,31 +31,24 @@ export function MessagesTable({
   focusMessageId?: string;
 }) {
   const router = useRouter();
+  const focusApplies = Boolean(
+    focusMessageId && initial.some((m) => m.id === focusMessageId),
+  );
+
   const [messages, setMessages] = useState(initial);
-  const [open, setOpen] = useState<string | null>(null);
+  const [open, setOpen] = useState<string | null>(focusApplies ? focusMessageId! : null);
   const [search, setSearch] = useState("");
-  const [status, setStatus] = useState<StatusFilter>("new");
-  const [didApplyFocus, setDidApplyFocus] = useState(false);
+  const [status, setStatus] = useState<StatusFilter>(focusApplies ? "all" : "new");
 
-  useEffect(() => {
-    setMessages(initial);
-  }, [initial]);
-
-  useEffect(() => {
-    if (!focusMessageId || didApplyFocus) return;
-    const exists = initial.some((m) => m.id === focusMessageId);
-    if (!exists) return;
-    setStatus("all");
-    setSearch("");
-    setOpen(focusMessageId);
-    setDidApplyFocus(true);
+  useLayoutEffect(() => {
+    if (!focusApplies || !focusMessageId) return;
     requestAnimationFrame(() => {
       document.getElementById(`contact-msg-${focusMessageId}`)?.scrollIntoView({
         behavior: "smooth",
         block: "nearest",
       });
     });
-  }, [focusMessageId, initial, didApplyFocus]);
+  }, [focusApplies, focusMessageId]);
 
   const counts = {
     total: messages.length,

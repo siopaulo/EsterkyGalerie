@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { formatDateCs } from "@/lib/utils";
 import { sanitizeHtml } from "@/features/blocks/sanitize";
+import { log } from "@/lib/logger";
 import { HomeHeroCarousel } from "@/components/public/home-hero-carousel";
 import { GalleryShowcase } from "@/components/public/gallery-showcase";
 import {
@@ -65,7 +66,11 @@ export function BlockRenderer({ blocks, photos, context }: BlockRendererProps) {
         if (!parsed.ok) {
           // Defenzivní – nerozbijeme stránku, jen vynecháme blok a zalogujeme.
           if (typeof window === "undefined") {
-            console.warn(`[blocks] invalid payload for ${b.block_type} (${b.id}): ${parsed.error}`);
+            log("warn", "blocks: invalid payload skipped", {
+              blockType: b.block_type,
+              blockId: b.id,
+              detail: parsed.error,
+            });
           }
           return null;
         }
