@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Save, X } from "lucide-react";
 import { toast } from "sonner";
@@ -20,6 +20,23 @@ interface Props {
   availableStories: StoryLite[];
 }
 
+function settingsFingerprint(s: SiteSettings): string {
+  return JSON.stringify({
+    site_name: s.site_name,
+    site_tagline: s.site_tagline,
+    default_seo_title: s.default_seo_title,
+    default_seo_description: s.default_seo_description,
+    contact_email_public: s.contact_email_public,
+    contact_email_delivery_target: s.contact_email_delivery_target,
+    phone: s.phone,
+    instagram_url: s.instagram_url,
+    facebook_url: s.facebook_url,
+    address: s.address,
+    featured_photo_ids: [...s.featured_photo_ids].sort(),
+    featured_story_ids: [...s.featured_story_ids].sort(),
+  });
+}
+
 /**
  * Nastavení webu je cíleně minimalistické – brand, kontakty, SEO
  * a „vybrané fotky / příběhy" pro homepage. Textový obsah homepage
@@ -30,6 +47,15 @@ export function SettingsEditor({ settings, availablePhotos, availableStories }: 
   const router = useRouter();
   const [values, setValues] = useState<SiteSettings>(settings);
   const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    setValues(settings);
+  }, [settings]);
+
+  const dirty = useMemo(
+    () => settingsFingerprint(values) !== settingsFingerprint(settings),
+    [values, settings],
+  );
 
   const photoMap = new Map(availablePhotos.map((p) => [p.id, p]));
 
@@ -56,8 +82,13 @@ export function SettingsEditor({ settings, availablePhotos, availableStories }: 
         // hero_texts záměrně neposíláme – edituje se přes moduly homepage.
       });
       if (!res.ok) {
-        const extra = res.fields ? Object.values(res.fields).filter(Boolean) : [];
-        toast.error([res.error, ...extra].slice(0, 4).join(" "));
+        const lines: string[] = [res.error];
+        if (res.fields) {
+          for (const m of Object.values(res.fields)) {
+            if (m && !lines.includes(m)) lines.push(m);
+          }
+        }
+        toast.error(lines.join("\n"));
         return;
       }
       toast.success("Nastavení uloženo.");
@@ -116,7 +147,10 @@ export function SettingsEditor({ settings, availablePhotos, availableStories }: 
           </div>
         </Card>
 
-        <Card title="SEO">
+        <Card
+          title="SEO"
+          description="Titulek v záložce na úvodní stránce bere název webu výše; výchozí title slouží hlavně pro náhled při sdílení odkazu a doplnění metadat."
+        >
           <Field label="Výchozí title">
             <Input
               value={values.default_seo_title ?? ""}
@@ -204,7 +238,7 @@ export function SettingsEditor({ settings, availablePhotos, availableStories }: 
 
       <aside>
         <div className="sticky top-6 rounded-lg border border-border bg-background p-6">
-          <Button variant="primary" onClick={save} disabled={saving} className="w-full">
+          <Button variant="primary" onClick={save} disabled={saving || !dirty} className="w-full">
             <Save className="h-4 w-4" /> {saving ? "Ukládám…" : "Uložit nastavení"}
           </Button>
           <p className="mt-3 text-xs text-muted-foreground">

@@ -5,56 +5,66 @@ import { revalidatePath } from "next/cache";
 import { requireAdmin } from "@/lib/auth";
 import { createSupabaseAdmin } from "@/lib/supabase/admin";
 
-function emptyToUndefined(v: unknown) {
-  if (v === "" || v === null || v === undefined) return undefined;
-  return v;
+/** Prázdný string / null z formuláře → null do DB. */
+function emptyToNullString() {
+  return z
+    .union([z.string(), z.literal(""), z.null()])
+    .optional()
+    .transform((v) => {
+      if (v === undefined || v === null) return null;
+      const t = v.trim();
+      return t === "" ? null : t;
+    });
 }
 
-function optionalHttpUrl(fieldLabel: string) {
-  return z.preprocess(
-    emptyToUndefined,
-    z
-      .string()
-      .max(500)
-      .superRefine((val, ctx) => {
-        try {
-          const u = new URL(val);
-          if (u.protocol !== "http:" && u.protocol !== "https:") {
-            ctx.addIssue({
-              code: "custom",
-              message: `${fieldLabel}: použijte adresu začínající na https://`,
-            });
-          }
-        } catch {
-          ctx.addIssue({
-            code: "custom",
-            message: `${fieldLabel}: zadejte platnou URL (např. https://instagram.com/…).`,
-          });
+function optionalEmail(message: string) {
+  return z
+    .union([z.string().max(200), z.literal(""), z.null()])
+    .optional()
+    .transform((v) => {
+      if (v === undefined || v === null) return null;
+      const t = v.trim();
+      return t === "" ? null : t;
+    })
+    .refine((v) => v === null || z.string().email().safeParse(v).success, { message });
+}
+
+function optionalHttpUrl(message: string) {
+  return z
+    .union([z.string().max(500), z.literal(""), z.null()])
+    .optional()
+    .transform((v) => {
+      if (v === undefined || v === null) return null;
+      const t = v.trim();
+      return t === "" ? null : t;
+    })
+    .superRefine((val, ctx) => {
+      if (val === null) return;
+      try {
+        const u = new URL(val);
+        if (u.protocol !== "http:" && u.protocol !== "https:") {
+          ctx.addIssue({ code: "custom", message: `${message} (musí začínat http:// nebo https://)` });
         }
-      }),
-  ).optional();
+      } catch {
+        ctx.addIssue({ code: "custom", message });
+      }
+    });
 }
 
 const settingsSchema = z.object({
   site_name: z.string().trim().min(1, "Název webu je povinný.").max(120, "Název webu je příliš dlouhý."),
-  site_tagline: z.preprocess(emptyToUndefined, z.string().max(200).optional()),
-  default_seo_title: z.preprocess(emptyToUndefined, z.string().max(200).optional()),
-  default_seo_description: z.preprocess(emptyToUndefined, z.string().max(400).optional()),
-  contact_email_public: z.preprocess(
-    emptyToUndefined,
-    z.string().email("Veřejný e-mail není ve platném tvaru.").max(200),
-  ).optional(),
-  contact_email_delivery_target: z.preprocess(
-    emptyToUndefined,
-    z.string().email("Doručovací e-mail není ve platném tvaru.").max(200),
-  ).optional(),
-  phone: z.preprocess(emptyToUndefined, z.string().max(60).optional()),
-  instagram_url: optionalHttpUrl("Instagram"),
-  facebook_url: optionalHttpUrl("Facebook"),
-  address: z.preprocess(emptyToUndefined, z.string().max(400).optional()),
+  site_tagline: emptyToNullString(),
+  default_seo_title: emptyToNullString(),
+  default_seo_description: emptyToNullString(),
+  contact_email_public: optionalEmail("Veřejný e-mail není ve platném tvaru."),
+  contact_email_delivery_target: optionalEmail("Doručovací e-mail není ve platném tvaru."),
+  phone: emptyToNullString(),
+  instagram_url: optionalHttpUrl("Instagram: zadejte platnou URL (např. https://instagram.com/…)."),
+  facebook_url: optionalHttpUrl("Facebook: zadejte platnou URL (např. https://facebook.com/…)."),
+  address: emptyToNullString(),
   hero_texts: z.record(z.string(), z.string()).optional(),
-  featured_photo_ids: z.array(z.string().uuid()).optional(),
-  featured_story_ids: z.array(z.string().uuid()).optional(),
+  featured_photo_ids: z.array(z.string().uuid("Neplatné ID fotky.")).default([]),
+  featured_story_ids: z.array(z.string().uuid("Neplatné ID příběhu.")).default([]),
 });
 
 export type UpdateSiteSettingsResult =
