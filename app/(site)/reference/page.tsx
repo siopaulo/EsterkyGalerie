@@ -10,16 +10,21 @@ import {
   type ReviewsSummary,
 } from "@/features/reviews/queries";
 import { ReviewsSort } from "@/components/public/reviews-sort";
-import { buildMetadata, jsonLd } from "@/lib/seo";
+import { buildMetadata, jsonLd, resolveSiteBrand } from "@/lib/seo";
+import { getSiteSettings } from "@/features/site-settings/queries";
 import { formatDateCs, safeNumber } from "@/lib/utils";
 
-export const metadata: Metadata = buildMetadata({
-  title: "Reference",
-  useTitleTemplate: true,
-  description:
-    "Ohlasy klientů z focení koní, portrétů a životních okamžiků. Přečti si zkušenosti ostatních a podělte se o tu svoji.",
-  path: "/reference",
-});
+export async function generateMetadata(): Promise<Metadata> {
+  const settings = await getSiteSettings();
+  return buildMetadata({
+    title: "Reference",
+    useTitleTemplate: true,
+    siteName: settings.site_name,
+    description:
+      "Ohlasy klientů z focení koní, portrétů a životních okamžiků. Přečti si zkušenosti ostatních a podělte se o tu svoji.",
+    path: "/reference",
+  });
+}
 
 export const revalidate = 120;
 
@@ -44,15 +49,17 @@ export default async function ReferencePage({ searchParams }: ReferencePageProps
     ? (sortParam as PublicReviewsSort)
     : "newest";
 
-  const [summary, list] = await Promise.all([
+  const [summary, list, settings] = await Promise.all([
     getReviewsSummary(),
     listApprovedReviews({ page, pageSize: PAGE_SIZE, sort }),
+    getSiteSettings(),
   ]);
+  const orgName = resolveSiteBrand(settings.site_name);
 
   const structured = summary.count > 0 && summary.average !== null
     ? jsonLd({
         "@type": "Organization",
-        name: "Esterky Fotky",
+        name: orgName,
         aggregateRating: {
           "@type": "AggregateRating",
           ratingValue: summary.average,

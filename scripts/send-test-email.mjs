@@ -18,7 +18,7 @@ if (!apiKey) {
 
 const from = process.env.RESEND_FROM;
 if (!from) {
-  console.error("✖  RESEND_FROM není nastaven. Nastav ověřený sender (např. Esterky Fotky <kontakt@ekphoto.cz>).");
+  console.error("✖  RESEND_FROM není nastaven. Nastav ověřený sender (např. EK photo <kontakt@domena.cz>).");
   process.exit(1);
 }
 const to = process.argv[2] || process.env.CONTACT_DELIVERY_EMAIL || "esterka.koznarova@seznam.cz";
@@ -32,7 +32,7 @@ console.log(`   to:   ${to}`);
 const { data, error } = await resend.emails.send({
   from,
   to,
-  subject: "Hello World z Esterky Fotky",
+  subject: "Hello World z webu (Resend test)",
   html: `
     <div style="font-family:Georgia,serif;max-width:520px;margin:0 auto;color:#2a2520;">
       <h2 style="border-bottom:1px solid #eee;padding-bottom:8px;">Gratulujeme!</h2>

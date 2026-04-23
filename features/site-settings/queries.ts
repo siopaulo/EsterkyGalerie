@@ -8,7 +8,7 @@ const FALLBACK: SiteSettings = {
   id: 1,
   site_name: SITE_DEFAULTS.name,
   site_tagline: SITE_DEFAULTS.tagline,
-  default_seo_title: SITE_DEFAULTS.name,
+  default_seo_title: `${SITE_DEFAULTS.name} – ${SITE_DEFAULTS.tagline}`,
   default_seo_description: SITE_DEFAULTS.description,
   contact_email_public: "kontakt@domena.cz",
   contact_email_delivery_target: null,

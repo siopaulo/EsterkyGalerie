@@ -1,4 +1,4 @@
-# Esterky Fotky
+# Esterky Galerie
 
 Produkční web pro české foto portfolio s důrazem na elegantní editorial fotografii, správu příběhů a centrální galerii. Veřejná část v češtině, privátní admin na `/studio`.
 
@@ -94,7 +94,7 @@ RLS politiky v migraci už pokrývají public read + authenticated write; kontak
 **Resend (odchozí e-mail z formuláře):**
 
 1. V Resend ověř doménu `domena.cz` a přidej požadované DNS záznamy.
-2. `RESEND_FROM="Esterky Fotky <kontakt@domena.cz>"` musí být na ověřené doméně.
+2. `RESEND_FROM="Název značky <kontakt@domena.cz>"` musí být na ověřené doméně.
 3. `CONTACT_DELIVERY_EMAIL` je osobní schránka majitelky.
 
 **Cloudflare Email Routing (příchozí e-mail, veřejná adresa):**

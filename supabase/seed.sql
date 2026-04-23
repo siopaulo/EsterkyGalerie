@@ -6,9 +6,9 @@ insert into public.site_settings (id, site_name, site_tagline, default_seo_title
   contact_email_public, contact_email_delivery_target, phone, instagram_url, facebook_url, hero_texts)
 values (
   1,
-  'Esterky Fotky',
+  'Foto web',
   'Fotografie s duší koně',
-  'Esterky Fotky – fotografie s duší koně',
+  'Fotografie s duší koně',
   'Editorial foto portfolio zaměřené na koně, portréty a přírodu. Autorka Esterka.',
   'kontakt@domena.cz',
   null,
@@ -21,15 +21,15 @@ on conflict (id) do nothing;
 
 -- Základní stránky
 insert into public.pages (slug, title, seo_title, seo_description, intro) values
-  ('o-mne', 'O mně', 'O autorce – Esterky Fotky', 'Kdo stojí za objektivem. Příběh, styl, přístup k fotografii.',
+  ('o-mne', 'O mně', 'O autorce', 'Kdo stojí za objektivem. Příběh, styl, přístup k fotografii.',
    'Jmenuji se Esterka a fotím od dětství. Nejsilnější vztah mám ke koním – k jejich tichu, pohybu a pohledu, který nelze hrát.'),
-  ('sluzby', 'Služby', 'Fotografické služby – Esterky Fotky', 'Focení koní a jezdců, portrétní focení, reportáže ze závodů i přírody.',
+  ('sluzby', 'Služby', 'Fotografické služby', 'Focení koní a jezdců, portrétní focení, reportáže ze závodů i přírody.',
    'Každé focení je domluvené osobně. Nehrajeme si na lesk, hledáme pravdivé okamžiky.'),
-  ('cenik', 'Ceník', 'Ceník – Esterky Fotky', 'Přehled cen focení a balíčků. Férově a transparentně.',
+  ('cenik', 'Ceník', 'Ceník', 'Přehled cen focení a balíčků. Férově a transparentně.',
    'Níže najdete základní balíčky. Ráda připravím nabídku přesně na míru – stačí se ozvat.'),
-  ('kontakt', 'Kontakt', 'Kontakt – Esterky Fotky', 'Napište mi. Ráda se ozvu zpět do 48 hodin.',
+  ('kontakt', 'Kontakt', 'Kontakt', 'Napište mi. Ráda se ozvu zpět do 48 hodin.',
    'Nejrychleji mě zastihnete e-mailem nebo na Instagramu.'),
-  ('ochrana-osobnich-udaju', 'Ochrana osobních údajů', 'Ochrana osobních údajů', 'Informace o zpracování osobních údajů na webu Esterky Fotky.',
+  ('ochrana-osobnich-udaju', 'Ochrana osobních údajů', 'Ochrana osobních údajů', 'Informace o zpracování osobních údajů na tomto webu.',
    'Tento dokument popisuje, jak nakládám s osobními údaji návštěvníků a klientů.')
 on conflict (slug) do nothing;
 

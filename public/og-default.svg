@@ -7,7 +7,7 @@
     </linearGradient>
   </defs>
   <rect width="1200" height="630" fill="url(#bg)"/>
-  <text x="600" y="300" text-anchor="middle" font-family="Georgia, serif" font-size="72" fill="#2a2520">Esterky Fotky</text>
+  <text x="600" y="300" text-anchor="middle" font-family="Georgia, serif" font-size="72" fill="#2a2520">Fotografie</text>
   <text x="600" y="370" text-anchor="middle" font-family="Inter, sans-serif" font-size="28" fill="#6d6459">Editorial photography portfolio</text>
   <line x1="500" y1="420" x2="700" y2="420" stroke="#8b6f47" stroke-width="2"/>
 </svg>

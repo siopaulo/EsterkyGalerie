@@ -1,5 +1,6 @@
 export const SITE_DEFAULTS = {
-  name: "Esterky Fotky",
+  /** Neutrální záloha v `<title>` / OG, když v nastavení webu není `site_name`. */
+  name: "Foto web",
   tagline: "Fotografie s duší koně",
   description:
     "Editorial foto portfolio zaměřené na koně, portréty a přírodu. Autorka Esterka.",

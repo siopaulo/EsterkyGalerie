@@ -1,5 +1,5 @@
 -- =============================================================
--- Esterky Fotky – reviews (veřejné reference)
+-- Reviews (veřejné reference)
 -- =============================================================
 -- Veřejný formulář reference → řádek vzniká jako `approved = false`.
 -- Admin schválí → veřejně viditelné.
