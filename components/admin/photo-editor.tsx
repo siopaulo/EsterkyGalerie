@@ -192,8 +192,8 @@ export function PhotoEditor({ photo, initialTagSlugs, availableTags, usage }: Ph
             ) : null
           }
         >
-          <Button type="button" variant="destructive">
-            <Trash2 className="h-4 w-4" /> Smazat
+          <Button type="button" variant="destructive" aria-label="Smazat fotografii">
+            <Trash2 className="h-4 w-4" aria-hidden /> Smazat
           </Button>
         </ConfirmDialog>
 

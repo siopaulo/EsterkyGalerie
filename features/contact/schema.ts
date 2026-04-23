@@ -26,3 +26,11 @@ export const contactSchema = z.object({
 });
 
 export type ContactInput = z.infer<typeof contactSchema>;
+
+export const replyInputSchema = z.object({
+  messageId: z.string().uuid("Neplatné ID zprávy"),
+  subject: z.string().trim().min(1, "Uveďte prosím předmět").max(200),
+  body: z.string().trim().min(2, "Zpráva je příliš krátká").max(10000),
+});
+
+export type ReplyInput = z.infer<typeof replyInputSchema>;

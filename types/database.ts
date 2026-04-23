@@ -131,6 +131,16 @@ export interface ContactMessage {
   created_at: string;
 }
 
+/** Odeslaná odpověď z adminu (Resend), navázaná na přijatou zprávu. */
+export interface ContactMessageReply {
+  id: string;
+  contact_message_id: string | null;
+  to_email: string;
+  subject: string;
+  body: string;
+  created_at: string;
+}
+
 export interface Review {
   id: string;
   name: string | null;

@@ -170,6 +170,54 @@ export async function softDeletePhotoAction(photoId: string, hardDeleteCloudinar
   return { ok: true };
 }
 
+const bulkDeleteSchema = z.array(z.string().uuid()).min(1).max(40);
+
+/**
+ * Hromadné soft-smazání fotek (stejná logika jako u jednotlivého mazání).
+ * Po dokončení jednou invaliduje cache.
+ */
+export async function bulkSoftDeletePhotosAction(
+  photoIds: string[],
+  hardDeleteCloudinary: boolean,
+): Promise<{ ok: true; deleted: number } | { ok: false; error: string }> {
+  await requireAdmin();
+  const parsed = bulkDeleteSchema.safeParse(photoIds);
+  if (!parsed.success) {
+    return { ok: false, error: "Neplatný výběr fotek (max. 40 najednou)." };
+  }
+
+  const admin = createSupabaseAdmin();
+  let deleted = 0;
+  for (const photoId of parsed.data) {
+    const { data: photo } = await admin
+      .from("photos")
+      .select("id, cloudinary_public_id")
+      .eq("id", photoId)
+      .is("deleted_at", null)
+      .maybeSingle();
+    if (!photo) continue;
+
+    await admin
+      .from("photos")
+      .update({ deleted_at: new Date().toISOString(), visibility: "hidden" })
+      .eq("id", photoId);
+
+    if (hardDeleteCloudinary) {
+      const usage = await getPhotoUsage(photo.id);
+      if (usage.total === 0) {
+        await deleteFromCloudinary(photo.cloudinary_public_id);
+      }
+    }
+    deleted += 1;
+  }
+
+  revalidatePath("/");
+  revalidatePath("/galerie");
+  revalidatePath("/studio/galerie");
+  revalidatePath("/studio/nastaveni");
+  return { ok: true, deleted };
+}
+
 /**
  * Spočítá využití fotky napříč systémem. Scanuje všechny block payloady aplikačně,
  * protože reference na fotky jsou v různých polích (photo_id, photo_ids[], left/right_photo_id,

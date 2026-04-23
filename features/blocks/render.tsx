@@ -204,7 +204,7 @@ function SectionHeadingBlock({ data }: { data: SectionHeadingPayload }) {
       )}
     >
       {data.eyebrow ? (
-        <p className="mb-3 text-xs font-medium uppercase tracking-[0.18em] text-accent-foreground">
+        <p className="mb-3 text-xs font-medium uppercase tracking-[0.18em] text-accent">
           {data.eyebrow}
         </p>
       ) : null}

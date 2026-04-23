@@ -68,7 +68,7 @@ export default async function CenikPage() {
                       <p className="mt-2 text-sm text-muted-foreground">{item.description}</p>
                     ) : null}
                     {item.price_label ? (
-                      <p className="mt-4 font-serif text-3xl text-accent-foreground">{item.price_label}</p>
+                      <p className="mt-4 font-serif text-3xl text-foreground">{item.price_label}</p>
                     ) : null}
                     {item.features?.length ? (
                       <ul className="mt-5 space-y-2 text-sm">

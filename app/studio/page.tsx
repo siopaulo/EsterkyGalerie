@@ -74,7 +74,7 @@ export default async function DashboardPage() {
                     <div className="text-right">
                       <p className="text-xs text-muted-foreground">{formatDateCs(m.created_at)}</p>
                       {!m.handled ? (
-                        <span className="text-xs text-accent-foreground">Nevyřízeno</span>
+                        <span className="text-xs font-medium text-accent">Nevyřízeno</span>
                       ) : (
                         <span className="text-xs text-muted-foreground">Vyřízeno</span>
                       )}

@@ -14,6 +14,7 @@ Produkční web pro české foto portfolio s důrazem na elegantní editorial fo
 - **Cloudflare Turnstile** – anti-spam
 - **Cloudflare Email Routing** – veřejný alias `kontakt@domena.cz`
 - **Cloudflare Web Analytics** – privacy-first analytics
+- **Sentry** (volitelné) – chyby v prohlížeči i na serveru
 - **Netlify** – deployment
 - **pnpm**
 
@@ -50,6 +51,16 @@ pnpm dev
 ```
 
 Web poběží na `http://localhost:3000`, studio na `http://localhost:3000/studio`.
+
+## Sentry (volitelné)
+
+1. Založ účet na [sentry.io](https://sentry.io), vytvoř projekt typu **Next.js**.
+2. Z **Settings → Client Keys (DSN)** zkopíruj DSN do `.env.local` jako `NEXT_PUBLIC_SENTRY_DSN` (a případně `SENTRY_DSN`, pokud chceš oddělit server – často stačí jen veřejná proměnná).
+3. Nastav `SENTRY_ENVIRONMENT` (např. `production`) kvůli filtrování v dashboardu.
+4. Volitelně: **Auth Token** + `SENTRY_ORG` + `SENTRY_PROJECT` v CI / Netlify pro čitelné stack trace (source maps). Bez tokenu build funguje, jen budou méně čitelné názvy souborů v Sentry.
+5. Po deployi ověř v Sentry záložku **Issues** (např. dočasně vyhoď testovací chybu z UI mimo devtools konzoli).
+
+Proměnné jsou popsány v `.env.example`. CSP v produkci už povoluje odesílání na Sentry ingest domény.
 
 ## Nastavení Supabase
 

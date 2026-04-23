@@ -9,7 +9,7 @@ const badgeVariants = cva(
       variant: {
         default: "border-transparent bg-muted text-foreground",
         outline: "border-border text-foreground",
-        accent: "border-transparent bg-accent/10 text-accent-foreground",
+        accent: "border-transparent bg-accent/10 text-accent",
         muted: "border-transparent bg-muted/60 text-muted-foreground",
       },
     },

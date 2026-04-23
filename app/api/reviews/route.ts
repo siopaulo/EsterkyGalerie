@@ -4,6 +4,7 @@ import { verifyTurnstile } from "@/lib/turnstile";
 import { createSupabaseAdmin } from "@/lib/supabase/admin";
 import { getClientIp, hashIp, rateLimit } from "@/lib/rate-limit";
 import { log } from "@/lib/logger";
+import { sendReviewPendingNotification } from "@/lib/resend";
 import { revalidatePath } from "next/cache";
 
 export const runtime = "nodejs";
@@ -74,6 +75,18 @@ export async function POST(request: NextRequest) {
         { error: "Recenzi se nepodařilo uložit. Zkuste to prosím později." },
         { status: 500 },
       );
+    }
+
+    const notify = await sendReviewPendingNotification({
+      rating: parsed.data.rating,
+      name: parsed.data.name ?? null,
+      message: parsed.data.message ?? null,
+    });
+    if (!notify.sent) {
+      log("warn", "review pending notification skipped or failed", {
+        reason: notify.reason,
+        err: notify.error,
+      });
     }
   } catch (err) {
     log("error", "reviews db insert exception", { err: String(err) });

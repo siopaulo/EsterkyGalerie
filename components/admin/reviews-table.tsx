@@ -262,8 +262,9 @@ export function ReviewsTable({ rows, total, pending, approved, filters }: Review
                                 setEditingId(null);
                                 setDraft({});
                               }}
+                              aria-label="Zrušit úpravy"
                             >
-                              <X className="h-4 w-4" />
+                              <X className="h-4 w-4" aria-hidden />
                             </Button>
                           </div>
                         ) : (
@@ -287,8 +288,13 @@ export function ReviewsTable({ rows, total, pending, approved, filters }: Review
                                 <Check className="h-4 w-4" /> Schválit
                               </Button>
                             )}
-                            <Button size="sm" variant="ghost" onClick={() => startEdit(r)}>
-                              <Pencil className="h-4 w-4" />
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              onClick={() => startEdit(r)}
+                              aria-label="Upravit recenzi"
+                            >
+                              <Pencil className="h-4 w-4" aria-hidden />
                             </Button>
                             <ConfirmDialog
                               title="Opravdu smazat tuto recenzi?"
@@ -301,7 +307,7 @@ export function ReviewsTable({ rows, total, pending, approved, filters }: Review
                                 className="text-red-700"
                                 aria-label="Smazat recenzi"
                               >
-                                <Trash2 className="h-4 w-4" />
+                                <Trash2 className="h-4 w-4" aria-hidden />
                               </Button>
                             </ConfirmDialog>
                           </div>
@@ -337,8 +343,8 @@ function FilterPill({
       className={cn(
         "inline-flex h-9 items-center rounded-full border px-3 text-sm transition-colors",
         active
-          ? tone === "accent"
-            ? "border-accent bg-accent/10 text-accent-foreground"
+            ? tone === "accent"
+            ? "border-accent bg-accent/10 text-accent"
             : "border-foreground bg-foreground text-background"
           : "border-border text-foreground hover:border-foreground/60",
       )}

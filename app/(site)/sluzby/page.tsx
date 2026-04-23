@@ -89,7 +89,7 @@ export default async function SluzbyPage() {
                 ["04", "Dodání", "Online galerie a výběr nejlepších."],
               ].map(([n, t, d]) => (
                 <li key={n} className="rounded-lg bg-muted/40 p-6">
-                  <p className="font-serif text-xl text-accent-foreground">{n}</p>
+                  <p className="font-serif text-xl text-accent">{n}</p>
                   <p className="mt-1 font-serif text-xl">{t}</p>
                   <p className="mt-2 text-sm text-muted-foreground">{d}</p>
                 </li>

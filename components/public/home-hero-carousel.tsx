@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type TouchEvent } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { CloudinaryImage } from "@/components/shared/cloudinary-image";
 import { cn } from "@/lib/utils";
@@ -24,6 +24,7 @@ export function HomeHeroCarousel({ photos, autoPlayMs = 5000 }: HomeHeroCarousel
   const [index, setIndex] = useState(0);
   const [paused, setPaused] = useState(false);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const touchStartX = useRef<number | null>(null);
 
   useEffect(() => {
     if (safe.length <= 1 || paused || autoPlayMs <= 0) return;
@@ -42,13 +43,30 @@ export function HomeHeroCarousel({ photos, autoPlayMs = 5000 }: HomeHeroCarousel
   const goPrev = () => setIndex((i) => (i - 1 + safe.length) % safe.length);
   const goNext = () => setIndex((i) => (i + 1) % safe.length);
 
+  function onTouchStart(e: TouchEvent) {
+    touchStartX.current = e.touches[0].clientX;
+  }
+  function onTouchEnd(e: TouchEvent) {
+    if (touchStartX.current == null || safe.length <= 1) return;
+    const dx = e.changedTouches[0].clientX - touchStartX.current;
+    touchStartX.current = null;
+    if (Math.abs(dx) < 40) return;
+    if (dx < 0) goNext();
+    else goPrev();
+  }
+
+  const arrowBtnClass =
+    "absolute top-1/2 z-10 -translate-y-1/2 inline-flex h-11 w-11 min-h-[44px] min-w-[44px] touch-manipulation items-center justify-center rounded-full bg-background/90 text-foreground shadow-md ring-1 ring-black/10 backdrop-blur-sm transition-all opacity-100 md:opacity-0 md:group-hover/carousel:opacity-100 md:focus-visible:opacity-100 hover:bg-background";
+
   return (
     <div
-      className="group/carousel relative"
+      className="group/carousel relative touch-pan-y"
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
       onFocusCapture={() => setPaused(true)}
       onBlurCapture={() => setPaused(false)}
+      onTouchStart={onTouchStart}
+      onTouchEnd={onTouchEnd}
     >
       <div className="relative overflow-hidden rounded-md shadow-xl aspect-[4/5] md:aspect-[5/6]">
         {safe.map((photo, i) => (
@@ -74,27 +92,11 @@ export function HomeHeroCarousel({ photos, autoPlayMs = 5000 }: HomeHeroCarousel
 
         {safe.length > 1 ? (
           <>
-            <button
-              type="button"
-              onClick={goPrev}
-              aria-label="Předchozí fotka"
-              className={cn(
-                "absolute left-3 top-1/2 z-10 -translate-y-1/2 inline-flex h-10 w-10 items-center justify-center rounded-full bg-background/80 text-foreground shadow-md ring-1 ring-black/10 backdrop-blur-sm transition-all",
-                "opacity-0 group-hover/carousel:opacity-100 focus-visible:opacity-100 hover:bg-background",
-              )}
-            >
-              <ChevronLeft className="h-5 w-5" />
+            <button type="button" onClick={goPrev} aria-label="Předchozí fotka" className={cn(arrowBtnClass, "left-2")}>
+              <ChevronLeft className="h-5 w-5" aria-hidden />
             </button>
-            <button
-              type="button"
-              onClick={goNext}
-              aria-label="Další fotka"
-              className={cn(
-                "absolute right-3 top-1/2 z-10 -translate-y-1/2 inline-flex h-10 w-10 items-center justify-center rounded-full bg-background/80 text-foreground shadow-md ring-1 ring-black/10 backdrop-blur-sm transition-all",
-                "opacity-0 group-hover/carousel:opacity-100 focus-visible:opacity-100 hover:bg-background",
-              )}
-            >
-              <ChevronRight className="h-5 w-5" />
+            <button type="button" onClick={goNext} aria-label="Další fotka" className={cn(arrowBtnClass, "right-2")}>
+              <ChevronRight className="h-5 w-5" aria-hidden />
             </button>
           </>
         ) : null}
