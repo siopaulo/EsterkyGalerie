@@ -66,9 +66,13 @@ export async function replyToMessageAction(input: ReplyInput): Promise<ReplyActi
         error: "Odesílání e-mailů není nakonfigurováno. Doplň RESEND_API_KEY, RESEND_FROM a CONTACT_DELIVERY_EMAIL.",
       };
     }
+    // Resend chyby logujeme detailně v `lib/resend.ts`, tady nechceme posílat surové hlášky do UI.
     return {
       ok: false,
-      error: result.error || "Odpověď se nepodařilo odeslat.",
+      error:
+        result.error && /domain is not verified/i.test(result.error)
+          ? "Odpověď se nepodařilo odeslat – odesílací doména není ověřená pro aktuální Resend API klíč. Zkontroluj `RESEND_API_KEY` a `RESEND_FROM` v deployi."
+          : "Odpověď se nepodařilo odeslat. Zkuste to prosím znovu za chvíli.",
     };
   }
 

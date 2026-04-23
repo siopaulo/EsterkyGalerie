@@ -27,6 +27,40 @@ export interface SendResult {
   error?: string;
 }
 
+function apiKeyFingerprint(apiKey: string | null): string | null {
+  if (!apiKey) return null;
+  const tail = apiKey.slice(-6);
+  return `${apiKey.slice(0, 3)}…${tail}`;
+}
+
+function extractEmailAddress(from: string): string {
+  // Accepts "Name <a@b.cz>" or just "a@b.cz"
+  const m = from.match(/<([^>]+)>/);
+  return (m?.[1] ?? from).trim();
+}
+
+function extractDomain(email: string): string | null {
+  const at = email.lastIndexOf("@");
+  if (at <= 0 || at === email.length - 1) return null;
+  return email.slice(at + 1).toLowerCase();
+}
+
+function resendMeta(flow: "contact" | "reply" | "review", apiKey: string | null, from: string | null) {
+  const fromAddr = from ? extractEmailAddress(from) : null;
+  return {
+    flow,
+    resendConfigured: serverEnv.resend.configured,
+    resendApiKey: apiKeyFingerprint(apiKey),
+    resendFrom: from ?? null,
+    resendFromAddress: fromAddr,
+    resendFromDomain: fromAddr ? extractDomain(fromAddr) : null,
+  };
+}
+
+function isDomainNotVerifiedError(msg: string): boolean {
+  return /domain is not verified/i.test(msg);
+}
+
 /**
  * Odešle e-mail přes Resend, pokud je nakonfigurován. Pokud ne, NEPROPADÁ –
  * jen zaloguje a vrátí { sent: false, reason: "not-configured" }. Volající
@@ -35,12 +69,17 @@ export interface SendResult {
 export async function sendContactEmail(payload: ContactEmailPayload): Promise<SendResult> {
   const { apiKey, from, to, configured } = serverEnv.resend;
   if (!configured || !apiKey || !from) {
-    log("warn", "resend not configured – e-mail nebyl odeslán", { name: payload.name });
+    log("warn", "resend not configured – e-mail nebyl odeslán", {
+      name: payload.name,
+      ...resendMeta("contact", apiKey, from),
+    });
     return { sent: false, reason: "not-configured" };
   }
   const target = payload.deliveryTarget || to;
   if (!target) {
-    log("warn", "resend bez cílové adresy – e-mail nebyl odeslán");
+    log("warn", "resend bez cílové adresy – e-mail nebyl odeslán", {
+      ...resendMeta("contact", apiKey, from),
+    });
     return { sent: false, reason: "not-configured" };
   }
 
@@ -84,13 +123,26 @@ export async function sendContactEmail(payload: ContactEmailPayload): Promise<Se
       text,
     });
     if (result.error) {
-      log("error", "resend error", { err: result.error.message });
+      log("error", "resend error", {
+        err: result.error.message,
+        hint: isDomainNotVerifiedError(result.error.message)
+          ? "Resend: ověř, že RESEND_API_KEY patří do účtu, kde je ověřená doména resendFromDomain."
+          : undefined,
+        to: target,
+        replyTo: payload.email,
+        ...resendMeta("contact", apiKey, from),
+      });
       return { sent: false, reason: "error", error: result.error.message };
     }
     return { sent: true };
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);
-    log("error", "resend exception", { err: msg });
+    log("error", "resend exception", {
+      err: msg,
+      to: target,
+      replyTo: payload.email,
+      ...resendMeta("contact", apiKey, from),
+    });
     return { sent: false, reason: "error", error: msg };
   }
 }
@@ -159,13 +211,24 @@ export async function sendReviewPendingNotification(payload: {
       text,
     });
     if (result.error) {
-      log("error", "resend review notify error", { err: result.error.message });
+      log("error", "resend review notify error", {
+        err: result.error.message,
+        hint: isDomainNotVerifiedError(result.error.message)
+          ? "Resend: ověř, že RESEND_API_KEY patří do účtu, kde je ověřená doména resendFromDomain."
+          : undefined,
+        to,
+        ...resendMeta("review", apiKey, from),
+      });
       return { sent: false, reason: "error", error: result.error.message };
     }
     return { sent: true };
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);
-    log("error", "resend review notify exception", { err: msg });
+    log("error", "resend review notify exception", {
+      err: msg,
+      to,
+      ...resendMeta("review", apiKey, from),
+    });
     return { sent: false, reason: "error", error: msg };
   }
 }
@@ -204,13 +267,26 @@ export async function sendReplyEmail(payload: ReplyEmailPayload): Promise<SendRe
       text,
     });
     if (result.error) {
-      log("error", "resend reply error", { err: result.error.message });
+      log("error", "resend reply error", {
+        err: result.error.message,
+        hint: isDomainNotVerifiedError(result.error.message)
+          ? "Resend: ověř, že RESEND_API_KEY patří do účtu, kde je ověřená doména resendFromDomain."
+          : undefined,
+        to: payload.to,
+        replyTo: replyTo ?? null,
+        ...resendMeta("reply", apiKey, from),
+      });
       return { sent: false, reason: "error", error: result.error.message };
     }
     return { sent: true };
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);
-    log("error", "resend reply exception", { err: msg });
+    log("error", "resend reply exception", {
+      err: msg,
+      to: payload.to,
+      replyTo: replyTo ?? null,
+      ...resendMeta("reply", apiKey, from),
+    });
     return { sent: false, reason: "error", error: msg };
   }
 }

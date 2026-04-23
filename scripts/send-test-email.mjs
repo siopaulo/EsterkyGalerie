@@ -6,7 +6,6 @@
 // Node >= 20.6 načte .env.local automaticky díky --env-file flagu v package.json.
 //
 // POZOR: adresa ve `from` musí být buď:
-//   - onboarding@resend.dev (jen na adresu registrovanou u Resend),
 //   - nebo na doméně ověřené v Resend (Domains → Add domain + DNS záznamy).
 
 import { Resend } from "resend";
@@ -17,7 +16,11 @@ if (!apiKey) {
   process.exit(1);
 }
 
-const from = process.env.RESEND_FROM || "onboarding@resend.dev";
+const from = process.env.RESEND_FROM;
+if (!from) {
+  console.error("✖  RESEND_FROM není nastaven. Nastav ověřený sender (např. Esterky Fotky <kontakt@ekphoto.cz>).");
+  process.exit(1);
+}
 const to = process.argv[2] || process.env.CONTACT_DELIVERY_EMAIL || "esterka.koznarova@seznam.cz";
 
 const resend = new Resend(apiKey);
