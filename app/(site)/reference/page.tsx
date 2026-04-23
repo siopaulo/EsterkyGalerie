@@ -6,8 +6,10 @@ import { Pagination } from "@/components/public/pagination";
 import {
   getReviewsSummary,
   listApprovedReviews,
+  type PublicReviewsSort,
   type ReviewsSummary,
 } from "@/features/reviews/queries";
+import { ReviewsSort } from "@/components/public/reviews-sort";
 import { buildMetadata, jsonLd } from "@/lib/seo";
 import { formatDateCs, safeNumber } from "@/lib/utils";
 
@@ -26,13 +28,24 @@ interface ReferencePageProps {
 
 const PAGE_SIZE = 10;
 
+const ALLOWED_SORTS: ReadonlyArray<PublicReviewsSort> = [
+  "newest",
+  "oldest",
+  "best",
+  "worst",
+];
+
 export default async function ReferencePage({ searchParams }: ReferencePageProps) {
   const params = await searchParams;
   const page = Math.max(1, safeNumber(params.page, 1));
+  const sortParam = typeof params.sort === "string" ? params.sort : undefined;
+  const sort: PublicReviewsSort = ALLOWED_SORTS.includes(sortParam as PublicReviewsSort)
+    ? (sortParam as PublicReviewsSort)
+    : "newest";
 
   const [summary, list] = await Promise.all([
     getReviewsSummary(),
-    listApprovedReviews({ page, pageSize: PAGE_SIZE }),
+    listApprovedReviews({ page, pageSize: PAGE_SIZE, sort }),
   ]);
 
   const structured = summary.count > 0 && summary.average !== null
@@ -110,6 +123,13 @@ export default async function ReferencePage({ searchParams }: ReferencePageProps
             </div>
           ) : (
             <>
+              <div className="mb-4 flex items-center justify-between gap-3">
+                <p className="text-sm text-muted-foreground">
+                  {list.total}{" "}
+                  {pluralReviewsCs(list.total)}
+                </p>
+                <ReviewsSort value={sort} />
+              </div>
               <ul className="space-y-5">
                 {list.rows.map((r) => (
                   <li

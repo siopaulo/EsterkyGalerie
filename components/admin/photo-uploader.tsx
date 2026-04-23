@@ -1,8 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Upload, X, CheckCircle2, AlertCircle } from "lucide-react";
+import { Upload, X, CheckCircle2, AlertCircle, RefreshCw } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -49,6 +49,7 @@ export function PhotoUploader({ availableTags, triggerLabel = "Nahrát fotku", a
   const [newTagInput, setNewTagInput] = useState("");
   const [newTags, setNewTags] = useState<string[]>([]);
   const [saving, setSaving] = useState(false);
+  const replaceInputRef = useRef<HTMLInputElement | null>(null);
 
   function reset() {
     setStage("pick");
@@ -201,15 +202,38 @@ export function PhotoUploader({ availableTags, triggerLabel = "Nahrát fotku", a
 
           {stage === "meta" && uploaded ? (
             <div className="grid gap-5 md:grid-cols-[180px_1fr]">
-              <div className="overflow-hidden rounded-md bg-muted">
-                <img
-                  src={cldUrl(uploaded.public_id, { width: 360, crop: "fill", gravity: "auto" })}
-                  alt=""
-                  className="h-full w-full object-cover"
-                />
-                <div className="p-2 text-xs text-muted-foreground">
-                  {uploaded.width}×{uploaded.height} · {(uploaded.bytes / 1024).toFixed(0)} kB · {uploaded.format}
+              <div className="space-y-2">
+                <div className="overflow-hidden rounded-md bg-muted">
+                  <img
+                    src={cldUrl(uploaded.public_id, { width: 360, crop: "fill", gravity: "auto" })}
+                    alt=""
+                    className="h-full w-full object-cover"
+                  />
+                  <div className="p-2 text-xs text-muted-foreground">
+                    {uploaded.width}×{uploaded.height} · {(uploaded.bytes / 1024).toFixed(0)} kB · {uploaded.format}
+                  </div>
                 </div>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  className="w-full"
+                  onClick={() => replaceInputRef.current?.click()}
+                  disabled={saving}
+                >
+                  <RefreshCw className="h-4 w-4" /> Změnit fotku
+                </Button>
+                <input
+                  ref={replaceInputRef}
+                  type="file"
+                  accept={ALLOWED.join(",")}
+                  className="hidden"
+                  onChange={(e) => {
+                    const f = e.target.files?.[0];
+                    e.target.value = "";
+                    if (f) handleFile(f);
+                  }}
+                />
               </div>
               <div className="space-y-4">
                 <div>

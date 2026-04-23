@@ -57,7 +57,7 @@ export async function fetchGallery(q: GalleryQuery): Promise<GalleryResult> {
 
   const supabase = await createSupabaseServerClient();
 
-  // Když filtrujeme tagy, potřebujeme id fotek, které mají VŠECHNY tagy – bereme průnik.
+  // Když filtrujeme tagy, bereme SJEDNOCENÍ – fotka se ukáže, pokud má alespoň jeden ze zvolených tagů.
   let tagFilteredIds: string[] | null = null;
   if (q.tagSlugs && q.tagSlugs.length > 0) {
     const { data: tags } = await supabase
@@ -68,18 +68,13 @@ export async function fetchGallery(q: GalleryQuery): Promise<GalleryResult> {
     if (!tagIds.length) {
       return { photos: [], total: 0, page, perPage, totalPages: 0 };
     }
-    // Načti photo_ids pro tagIds
     const { data: pt } = await supabase
       .from("photo_tags")
-      .select("photo_id, tag_id")
+      .select("photo_id")
       .in("tag_id", tagIds);
-    const counts = new Map<string, number>();
-    for (const row of pt ?? []) {
-      counts.set(row.photo_id, (counts.get(row.photo_id) ?? 0) + 1);
-    }
-    tagFilteredIds = Array.from(counts.entries())
-      .filter(([, c]) => c === tagIds.length)
-      .map(([id]) => id);
+    const unique = new Set<string>();
+    for (const row of pt ?? []) unique.add(row.photo_id);
+    tagFilteredIds = Array.from(unique);
     if (!tagFilteredIds.length) {
       return { photos: [], total: 0, page, perPage, totalPages: 0 };
     }

@@ -1,9 +1,8 @@
 "use client";
 
-import Link from "next/link";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { ExternalLink, Save, X } from "lucide-react";
+import { Save, X } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -68,21 +67,6 @@ export function SettingsEditor({ settings, availablePhotos, availableStories }: 
   return (
     <div className="grid gap-8 lg:grid-cols-[1fr_320px]">
       <div className="space-y-8">
-        <div className="rounded-lg border border-accent/30 bg-accent/5 p-5">
-          <h2 className="font-serif text-lg">Úpravy hlavní stránky</h2>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Texty, layout i carousel homepage se editují jako moduly v sekci
-            <span className="mx-1 font-medium text-foreground">Studio → Stránky → Hlavní stránka</span>.
-            Zde v nastavení najdeš pouze globální konfiguraci webu a globálně použitelné výběry.
-          </p>
-          <Link
-            href="/studio/stranky"
-            className="mt-3 inline-flex items-center gap-1 text-sm font-medium text-foreground underline underline-offset-4 hover:text-accent"
-          >
-            Přejít na moduly stránek <ExternalLink className="h-3.5 w-3.5" />
-          </Link>
-        </div>
-
         <Card title="Značka">
           <Field label="Název webu">
             <Input value={values.site_name} onChange={(e) => set("site_name", e.target.value)} />

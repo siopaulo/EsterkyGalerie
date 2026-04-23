@@ -16,6 +16,8 @@ export interface ReviewsSummary {
   distribution: Record<1 | 2 | 3 | 4 | 5, number>;
 }
 
+export type PublicReviewsSort = "newest" | "oldest" | "best" | "worst";
+
 /**
  * Veřejný list schválených recenzí. Čte přes anon client,
  * RLS filtruje neschválené.
@@ -23,19 +25,41 @@ export interface ReviewsSummary {
 export async function listApprovedReviews(opts: {
   page?: number;
   pageSize?: number;
+  sort?: PublicReviewsSort;
 }): Promise<ReviewsPage> {
   const pageSize = Math.max(1, Math.min(50, opts.pageSize ?? 10));
   const page = Math.max(1, opts.page ?? 1);
   const from = (page - 1) * pageSize;
   const to = from + pageSize - 1;
+  const sort: PublicReviewsSort = opts.sort ?? "newest";
 
   const supabase = await createSupabaseServerClient();
-  const { data, count } = await supabase
+  let query = supabase
     .from("reviews")
     .select("*", { count: "exact" })
-    .eq("approved", true)
-    .order("created_at", { ascending: false })
-    .range(from, to);
+    .eq("approved", true);
+
+  switch (sort) {
+    case "oldest":
+      query = query.order("created_at", { ascending: true });
+      break;
+    case "best":
+      query = query
+        .order("rating", { ascending: false })
+        .order("created_at", { ascending: false });
+      break;
+    case "worst":
+      query = query
+        .order("rating", { ascending: true })
+        .order("created_at", { ascending: false });
+      break;
+    case "newest":
+    default:
+      query = query.order("created_at", { ascending: false });
+      break;
+  }
+
+  const { data, count } = await query.range(from, to);
 
   const total = count ?? 0;
   return {

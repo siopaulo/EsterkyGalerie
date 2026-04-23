@@ -25,6 +25,7 @@ export async function fetchStories(q: StoriesQuery): Promise<StoriesResult> {
 
   const supabase = await createSupabaseServerClient();
 
+  // SJEDNOCENÍ – příběh se ukáže, pokud má alespoň jeden ze zvolených tagů.
   let tagFilteredIds: string[] | null = null;
   if (q.tagSlugs && q.tagSlugs.length > 0) {
     const { data: tags } = await supabase.from("tags").select("id").in("slug", q.tagSlugs);
@@ -32,13 +33,11 @@ export async function fetchStories(q: StoriesQuery): Promise<StoriesResult> {
     if (!tagIds.length) return empty(page, perPage);
     const { data: st } = await supabase
       .from("story_tags")
-      .select("story_id, tag_id")
+      .select("story_id")
       .in("tag_id", tagIds);
-    const counts = new Map<string, number>();
-    for (const row of st ?? []) counts.set(row.story_id, (counts.get(row.story_id) ?? 0) + 1);
-    tagFilteredIds = Array.from(counts.entries())
-      .filter(([, c]) => c === tagIds.length)
-      .map(([id]) => id);
+    const unique = new Set<string>();
+    for (const row of st ?? []) unique.add(row.story_id);
+    tagFilteredIds = Array.from(unique);
     if (!tagFilteredIds.length) return empty(page, perPage);
   }
 
