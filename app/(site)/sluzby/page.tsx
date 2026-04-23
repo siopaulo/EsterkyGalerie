@@ -5,21 +5,18 @@ import { BlockRenderer } from "@/features/blocks/render";
 import { collectPhotoIds } from "@/features/blocks/collect-ids";
 import { fetchPhotosByIds } from "@/features/photos/queries";
 import { Button } from "@/components/ui/button";
-import { buildMetadata, resolveSiteBrand } from "@/lib/seo";
+import { metadataForCmsPage } from "@/lib/seo";
 import { getSiteSettings } from "@/features/site-settings/queries";
 
 export const revalidate = 300;
 
 export async function generateMetadata(): Promise<Metadata> {
   const [data, settings] = await Promise.all([fetchPageBySlug("sluzby"), getSiteSettings()]);
-  const brand = resolveSiteBrand(settings.site_name);
-  const segment = data?.page.seo_title || data?.page.title || "Služby";
-  return buildMetadata({
-    title: `${segment} | ${brand}`,
-    titleIsAbsolute: true,
-    description: data?.page.seo_description,
+  return metadataForCmsPage({
+    page: data?.page,
     path: "/sluzby",
-    siteName: brand,
+    fallbackTitle: "Služby",
+    siteName: settings.site_name,
   });
 }
 

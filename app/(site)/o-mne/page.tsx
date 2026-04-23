@@ -3,7 +3,7 @@ import { fetchPageBySlug } from "@/features/pages/queries";
 import { BlockRenderer } from "@/features/blocks/render";
 import { collectPhotoIds } from "@/features/blocks/collect-ids";
 import { fetchPhotosByIds } from "@/features/photos/queries";
-import { buildMetadata, resolveSiteBrand } from "@/lib/seo";
+import { buildMetadata, metadataForCmsPage } from "@/lib/seo";
 import { getSiteSettings } from "@/features/site-settings/queries";
 import { notFound } from "next/navigation";
 
@@ -11,14 +11,19 @@ export const revalidate = 300;
 
 export async function generateMetadata(): Promise<Metadata> {
   const [data, settings] = await Promise.all([fetchPageBySlug("o-mne"), getSiteSettings()]);
-  const brand = resolveSiteBrand(settings.site_name);
-  const segment = data ? data.page.seo_title || data.page.title : "O mně";
-  return buildMetadata({
-    title: `${segment} | ${brand}`,
-    titleIsAbsolute: true,
-    description: data?.page.seo_description,
+  if (!data) {
+    return buildMetadata({
+      title: "O mně",
+      path: "/o-mne",
+      useTitleTemplate: true,
+      siteName: settings.site_name,
+    });
+  }
+  return metadataForCmsPage({
+    page: data.page,
     path: "/o-mne",
-    siteName: brand,
+    fallbackTitle: "O mně",
+    siteName: settings.site_name,
   });
 }
 

@@ -35,13 +35,21 @@ export interface BuildMetadataInput {
   title?: string | null;
   /** Značka pro suffix „Stránka | …“ a pro OpenGraph siteName. Výchozí = SITE_DEFAULTS.name */
   siteName?: string | null;
-  /** Když je true a `title` je neprázdný, titulek dokumentu je přesně `title` (bez „| značka“). */
+  /**
+   * Celý titulek bez šablony z layoutu (`title.absolute` v Next.js).
+   * Nutné pro chybové stránky apod., aby se nepřidal druhý „| značka“.
+   */
   titleIsAbsolute?: boolean;
   /**
-   * Když je true a `title` je neprázdný, vrátí se jen segment titulku (např. „Kontakt“) pro sloučení
-   * s `title.template` z nadřazeného layoutu. OG/Twitter použijí plný „title | značka“.
+   * Segment pro záložku; sloučí se s `title.template` v `(site)/layout.tsx`.
+   * OG/Twitter: „segment | značka“, případně viz `openGraphTitle`.
    */
   useTitleTemplate?: boolean;
+  /**
+   * Delší segment jen pro OG/Twitter při `useTitleTemplate` (např. SEO titul z DB).
+   * Když chybí nebo se shoduje s `title`, použije se `title`.
+   */
+  openGraphTitle?: string | null;
   description?: string | null;
   path?: string;
   image?: string | null;
@@ -49,21 +57,58 @@ export interface BuildMetadataInput {
   type?: "website" | "article";
 }
 
+/** Stránka z tabulky `pages` – jednotné metadata pro veřejné CMS podstránky. */
+export type CmsPageForMetadata = {
+  title: string;
+  seo_title: string | null;
+  seo_description: string | null;
+};
+
+/**
+ * Záložka = krátký `page.title` (jako v menu), OG může použít delší `seo_title`, pokud se liší.
+ */
+export function metadataForCmsPage(args: {
+  page: CmsPageForMetadata | null | undefined;
+  path: string;
+  fallbackTitle: string;
+  siteName?: string | null;
+}): Metadata {
+  const tab = (args.page?.title?.trim() || args.fallbackTitle).trim();
+  const seo = args.page?.seo_title?.trim();
+  const useSeoForOg = Boolean(seo && seo.toLowerCase() !== tab.toLowerCase());
+  return buildMetadata({
+    title: tab,
+    openGraphTitle: useSeoForOg ? seo : undefined,
+    description: args.page?.seo_description,
+    path: args.path,
+    useTitleTemplate: true,
+    siteName: args.siteName,
+  });
+}
+
 export function buildMetadata(input: BuildMetadataInput = {}): Metadata {
   const brand = resolveSiteBrand(input.siteName);
   const titleCleaned = stripLegacyBrandFromTitle(input.title?.trim() ?? "");
   const rawTitle = titleCleaned || undefined;
-  const ogTitle =
-    rawTitle && !input.titleIsAbsolute ? `${rawTitle} | ${brand}` : rawTitle ? rawTitle : brand;
+  const ogSegmentCleaned = input.openGraphTitle?.trim()
+    ? stripLegacyBrandFromTitle(input.openGraphTitle.trim())
+    : "";
+  const segmentForOg = (ogSegmentCleaned || titleCleaned).trim() || undefined;
 
-  const documentTitle: Metadata["title"] =
-    rawTitle && input.useTitleTemplate
-      ? rawTitle
-      : rawTitle && input.titleIsAbsolute
-        ? rawTitle
-        : rawTitle
-          ? `${rawTitle} | ${brand}`
-          : brand;
+  const ogTitle = (() => {
+    if (!rawTitle) return brand;
+    if (input.titleIsAbsolute) return rawTitle;
+    if (input.useTitleTemplate && segmentForOg) return `${segmentForOg} | ${brand}`;
+    if (rawTitle) return `${rawTitle} | ${brand}`;
+    return brand;
+  })();
+
+  const documentTitle: Metadata["title"] = (() => {
+    if (!rawTitle) return brand;
+    if (input.titleIsAbsolute) return { absolute: rawTitle };
+    if (input.useTitleTemplate) return rawTitle;
+    return `${rawTitle} | ${brand}`;
+  })();
   const descriptionRaw = input.description?.trim() || SITE_DEFAULTS.description;
   const description =
     stripLegacyBrandFromFreeText(descriptionRaw) || SITE_DEFAULTS.description;
