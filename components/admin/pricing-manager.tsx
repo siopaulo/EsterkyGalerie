@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
+import { ConfirmDialog } from "@/components/admin/confirm-dialog";
 import { upsertPricingItemAction, deletePricingItemAction } from "@/features/pricing/actions";
 import type { PricingItem } from "@/types/database";
 
@@ -102,6 +103,7 @@ function PricingRow({
   onDelete: () => void | Promise<void>;
 }) {
   const [featureInput, setFeatureInput] = useState("");
+  const isDraft = item.id.startsWith("new-");
   function set(patch: Partial<PricingItem>) {
     onChange({ ...item, ...patch });
   }
@@ -192,9 +194,21 @@ function PricingRow({
         </div>
       </div>
       <div className="mt-5 flex justify-between">
-        <Button variant="ghost" className="text-red-700" onClick={onDelete}>
-          <Trash2 className="h-4 w-4" /> Smazat
-        </Button>
+        {isDraft ? (
+          <Button variant="ghost" className="text-red-700" onClick={onDelete}>
+            <Trash2 className="h-4 w-4" /> Zahodit
+          </Button>
+        ) : (
+          <ConfirmDialog
+            title="Opravdu smazat tuto položku ceníku?"
+            description="Tuto akci nelze vrátit zpět. Položka bude trvale odstraněna z ceníku."
+            onConfirm={onDelete}
+          >
+            <Button variant="ghost" className="text-red-700">
+              <Trash2 className="h-4 w-4" /> Smazat
+            </Button>
+          </ConfirmDialog>
+        )}
         <Button variant="primary" onClick={() => onSave(item)}>
           <Save className="h-4 w-4" /> Uložit
         </Button>

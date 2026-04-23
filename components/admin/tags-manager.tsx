@@ -6,17 +6,7 @@ import { Trash2, Plus, Save } from "lucide-react";
 import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
+import { ConfirmDialog } from "@/components/admin/confirm-dialog";
 import { upsertTagAction, deleteTagAction } from "@/features/tags/actions";
 import type { Tag } from "@/types/database";
 
@@ -112,27 +102,15 @@ function TagRow({
             <Save className="h-4 w-4" /> Uložit
           </Button>
         ) : null}
-        <AlertDialog>
-          <AlertDialogTrigger asChild>
-            <Button variant="ghost" size="sm" className="text-red-700">
-              <Trash2 className="h-4 w-4" />
-            </Button>
-          </AlertDialogTrigger>
-          <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogTitle>Smazat tag „{tag.name}“?</AlertDialogTitle>
-              <AlertDialogDescription>
-                Odebere se ze všech navázaných fotek a příběhů. Samotné fotky zůstanou.
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-              <AlertDialogCancel>Zrušit</AlertDialogCancel>
-              <AlertDialogAction className="bg-red-700 text-white hover:bg-red-800" onClick={() => onDelete(tag.id)}>
-                Smazat
-              </AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
+        <ConfirmDialog
+          title={`Opravdu smazat tag „${tag.name}"?`}
+          description="Tag bude odstraněn ze všech navázaných fotografií a příběhů. Samotné fotografie zůstanou nedotčené."
+          onConfirm={() => onDelete(tag.id)}
+        >
+          <Button variant="ghost" size="sm" className="text-red-700" aria-label={`Smazat tag ${tag.name}`}>
+            <Trash2 className="h-4 w-4" />
+          </Button>
+        </ConfirmDialog>
       </div>
     </li>
   );

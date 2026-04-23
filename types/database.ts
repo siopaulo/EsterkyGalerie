@@ -131,6 +131,18 @@ export interface ContactMessage {
   created_at: string;
 }
 
+export interface Review {
+  id: string;
+  name: string | null;
+  rating: number;
+  message: string | null;
+  approved: boolean;
+  ip_hash: string | null;
+  user_agent: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
 export interface AssetReference {
   id: string;
   photo_id: string;

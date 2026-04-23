@@ -37,3 +37,18 @@ export async function hashIp(ip: string): Promise<string> {
     .join("")
     .slice(0, 32);
 }
+
+/**
+ * Vrátí nejdůvěryhodnější IP klienta z hlaviček.
+ * Pořadí priority: `x-forwarded-for` → `cf-connecting-ip` → `x-real-ip`.
+ * Při proxy řetězu bere první hodnotu z XFF (originální klient).
+ * Fallback `0.0.0.0` zajistí, že rate-limit klíč je vždy validní string.
+ */
+export function getClientIp(req: { headers: Headers }): string {
+  const header =
+    req.headers.get("x-forwarded-for") ??
+    req.headers.get("cf-connecting-ip") ??
+    req.headers.get("x-real-ip") ??
+    "";
+  return header.split(",")[0]?.trim() || "0.0.0.0";
+}

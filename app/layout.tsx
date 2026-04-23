@@ -3,9 +3,8 @@ import Script from "next/script";
 import { Cormorant_Garamond, Inter } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "@/components/ui/toast";
-import { buildMetadata } from "@/lib/seo";
+import { buildMetadata, jsonLd } from "@/lib/seo";
 import { publicEnv } from "@/lib/env";
-import { jsonLd } from "@/lib/seo";
 import { getSiteSettings } from "@/features/site-settings/queries";
 
 const inter = Inter({
@@ -35,7 +34,12 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   const cfToken = publicEnv.cfAnalyticsToken;
 
   return (
-    <html lang="cs" className={`${inter.variable} ${cormorant.variable}`} suppressHydrationWarning>
+    <html
+      lang="cs"
+      className={`${inter.variable} ${cormorant.variable}`}
+      data-scroll-behavior="smooth"
+      suppressHydrationWarning
+    >
       <head>
         <link rel="icon" type="image/png" href="/logo.png" />
         <link rel="apple-touch-icon" href="/logo.png" />

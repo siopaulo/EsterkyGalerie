@@ -14,6 +14,7 @@ export const PUBLIC_NAV = [
   { href: "/pribehy", label: "Příběhy" },
   { href: "/galerie", label: "Galerie" },
   { href: "/cenik", label: "Ceník" },
+  { href: "/reference", label: "Reference" },
   { href: "/kontakt", label: "Kontakt" },
 ] as const;
 
@@ -25,6 +26,7 @@ export const ADMIN_NAV = [
   { href: "/studio/tagy", label: "Tagy", icon: "Tag" },
   { href: "/studio/cenik", label: "Ceník", icon: "Wallet" },
   { href: "/studio/kontakty", label: "Zprávy", icon: "Mail" },
+  { href: "/studio/recenze", label: "Reference", icon: "Star" },
   { href: "/studio/nastaveni", label: "Nastavení", icon: "Settings" },
 ] as const;
 

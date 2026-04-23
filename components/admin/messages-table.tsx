@@ -6,6 +6,7 @@ import { Mail, CheckCircle2, RotateCcw, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { ConfirmDialog } from "@/components/admin/confirm-dialog";
 import { formatDateCs } from "@/lib/utils";
 import { toggleMessageHandledAction, deleteMessageAction } from "@/features/contact/actions";
 import type { ContactMessage } from "@/types/database";
@@ -103,14 +104,19 @@ export function MessagesTable({ messages: initial }: { messages: ContactMessage[
                             </>
                           )}
                         </Button>
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          className="text-red-700"
-                          onClick={() => remove(m.id)}
+                        <ConfirmDialog
+                          title="Opravdu smazat tuto zprávu?"
+                          description="Tuto akci nelze vrátit zpět. Zpráva bude trvale odstraněna."
+                          onConfirm={() => remove(m.id)}
                         >
-                          <Trash2 className="h-4 w-4" /> Smazat
-                        </Button>
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            className="text-red-700"
+                          >
+                            <Trash2 className="h-4 w-4" /> Smazat
+                          </Button>
+                        </ConfirmDialog>
                       </div>
                     </td>
                   </tr>

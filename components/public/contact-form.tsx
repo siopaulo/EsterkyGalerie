@@ -1,7 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import Script from "next/script";
+import { useCallback, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
@@ -11,21 +10,13 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { contactSchema, type ContactInput } from "@/features/contact/schema";
+import { TurnstileWidget } from "@/components/public/turnstile-widget";
 import { publicEnv } from "@/lib/env";
-
-declare global {
-  interface Window {
-    turnstile?: {
-      render: (el: HTMLElement | string, opts: Record<string, unknown>) => string;
-      reset: (id?: string) => void;
-    };
-  }
-}
 
 export function ContactForm() {
   const [token, setToken] = useState<string>("");
   const [submitted, setSubmitted] = useState(false);
-  const siteKey = publicEnv.turnstileSiteKey;
+  const turnstileEnabled = Boolean(publicEnv.turnstileSiteKey);
 
   const form = useForm<ContactInput>({
     resolver: zodResolver(contactSchema) as never,
@@ -41,7 +32,13 @@ export function ContactForm() {
     mode: "onBlur",
   });
 
+  const handleToken = useCallback((t: string) => setToken(t), []);
+
   const onSubmit = async (values: ContactInput) => {
+    if (turnstileEnabled && !token) {
+      toast.error("Ještě chvilku – dokončuje se ověření proti robotům.");
+      return;
+    }
     try {
       const res = await fetch("/api/contact", {
         method: "POST",
@@ -55,7 +52,14 @@ export function ContactForm() {
       }
       setSubmitted(true);
       form.reset();
-      if (window.turnstile) window.turnstile.reset();
+      setToken("");
+      if (typeof window !== "undefined" && window.turnstile) {
+        try {
+          window.turnstile.reset();
+        } catch {
+          // ignore
+        }
+      }
       toast.success("Zpráva odeslána. Ozvu se co nejdřív.");
     } catch {
       toast.error("Při odesílání došlo k chybě sítě.");
@@ -131,24 +135,18 @@ export function ContactForm() {
         <p className="text-sm text-red-700">{form.formState.errors.consent.message as string}</p>
       ) : null}
 
-      {siteKey ? (
-        <>
-          <Script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer />
-          <div
-            className="cf-turnstile"
-            data-sitekey={siteKey}
-            data-callback="__turnstileSet"
-          />
-          <Script id="turnstile-callback">{`window.__turnstileSet = function(token){ window.dispatchEvent(new CustomEvent('turnstile-token',{detail:token})); };`}</Script>
-          <TurnstileListener onToken={setToken} />
-        </>
-      ) : null}
+      {turnstileEnabled ? <TurnstileWidget onToken={handleToken} action="contact" /> : null}
 
       <div className="flex items-center justify-between pt-2">
         <p className="text-xs text-muted-foreground">
           Odesláním přijímáte zásady ochrany osobních údajů.
         </p>
-        <Button type="submit" size="lg" variant="primary" disabled={form.formState.isSubmitting}>
+        <Button
+          type="submit"
+          size="lg"
+          variant="primary"
+          disabled={form.formState.isSubmitting || (turnstileEnabled && !token)}
+        >
           {form.formState.isSubmitting ? "Odesílám…" : "Odeslat zprávu"}
         </Button>
       </div>
@@ -172,15 +170,4 @@ function Field({
       {error ? <p className="text-sm text-red-700">{error}</p> : null}
     </div>
   );
-}
-
-function TurnstileListener({ onToken }: { onToken: (t: string) => void }) {
-  useEffect(() => {
-    const handler = (e: Event) => {
-      onToken((e as CustomEvent<string>).detail ?? "");
-    };
-    window.addEventListener("turnstile-token", handler);
-    return () => window.removeEventListener("turnstile-token", handler);
-  }, [onToken]);
-  return null;
 }

@@ -10,6 +10,7 @@ import {
   Tag,
   Wallet,
   Mail,
+  Star,
   Settings,
   LogOut,
 } from "lucide-react";
@@ -23,6 +24,7 @@ const ITEMS = [
   { href: "/studio/tagy", label: "Tagy", Icon: Tag },
   { href: "/studio/cenik", label: "Ceník", Icon: Wallet },
   { href: "/studio/kontakty", label: "Zprávy", Icon: Mail },
+  { href: "/studio/recenze", label: "Reference", Icon: Star },
   { href: "/studio/nastaveni", label: "Nastavení", Icon: Settings },
 ];
 

@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { BlockRenderer, type RenderableBlock } from "@/features/blocks/render";
+import { BlockRenderer } from "@/features/blocks/render";
 import { collectPhotoIds } from "@/features/blocks/collect-ids";
 import { getSiteSettings } from "@/features/site-settings/queries";
 import { fetchPhotosByIds } from "@/features/photos/queries";
@@ -46,7 +46,7 @@ export default async function HomePage() {
   const { stories } = await fetchStories({ page: 1, perPage: 6 });
 
   // Sbíráme IDs z payloadů + fallback featured IDs (mohou být použity home bloky).
-  const blockPhotoIds = collectPhotoIds(blocks as unknown as RenderableBlock[]);
+  const blockPhotoIds = collectPhotoIds(blocks);
   const allIds = Array.from(new Set([...blockPhotoIds, ...featured.map((p) => p.id)]));
   const photoList = allIds.length > 0 ? await fetchPhotosByIds(allIds) : [];
   const photoMap = new Map(photoList.map((p) => [p.id, p]));
@@ -54,7 +54,7 @@ export default async function HomePage() {
   return (
     <div className="pb-20">
       <BlockRenderer
-        blocks={blocks as unknown as RenderableBlock[]}
+        blocks={blocks}
         photos={photoMap}
         context={{
           stories,

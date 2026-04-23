@@ -96,8 +96,18 @@ RLS politiky v migraci už pokrývají public read + authenticated write; kontak
 ## Turnstile
 
 1. V Cloudflare dashboardu vytvoř Turnstile site a přidej doménu.
-2. Doplň `NEXT_PUBLIC_TURNSTILE_SITE_KEY` a `TURNSTILE_SECRET_KEY`.
-3. Widget se renderuje v `ContactForm`, server ho ověřuje v `/api/contact`.
+2. Doplň **oba** klíče: `NEXT_PUBLIC_TURNSTILE_SITE_KEY` (klient) a `TURNSTILE_SECRET_KEY` (server).
+3. Sdílená klientská komponenta `components/public/turnstile-widget.tsx` vykresluje widget v `ContactForm` i `ReviewForm`. Server ověřuje token v `/api/contact` a `/api/reviews` přes `lib/turnstile.ts` (volá Cloudflare Siteverify).
+4. **V produkci je `TURNSTILE_SECRET_KEY` povinný** – pokud chybí, formuláře selžou (`not-configured`). Žádný tichý bypass, aby produkce neběžela bez ochrany.
+5. V devu bez klíčů se ověření přeskočí (pro rychlé iterace). Chceš-li Turnstile otestovat lokálně, použij oficiální „always-pass" test keys Cloudflare (`1x00000000000000000000AA` / `1x0000000000000000000000000000000AA`).
+
+## Reference / recenze
+
+- Veřejná stránka `/reference` ukazuje schválené recenze, agregát hvězdiček a distribuci.
+- Veřejný formulář `ReviewForm` posílá novou recenzi do `/api/reviews` – chráněné rate-limitem (3/hod/IP), honeypotem a Turnstile.
+- Nová recenze vzniká vždy jako `approved = false`.
+- Admin sekce `/studio/recenze` umí filtrovat (ke schválení / schváleno / podle hvězdiček), řadit, editovat, mazat a schvalovat/skrývat.
+- Data v `public.reviews` (migrace `supabase/migrations/0004_reviews.sql`), RLS pouští veřejné čtení jen pro `approved = true`.
 
 ## Cloudflare Web Analytics
 

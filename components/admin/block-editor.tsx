@@ -14,6 +14,7 @@ import {
   parseBlockPayload,
 } from "@/features/blocks/schemas";
 import { PhotoPicker, PhotoChip, type PhotoLite } from "@/components/admin/photo-picker";
+import { ConfirmDialog } from "@/components/admin/confirm-dialog";
 import { Checkbox } from "@/components/ui/checkbox";
 
 export interface BlockDraft {
@@ -186,16 +187,19 @@ export function BlockEditor({ value, onChange, photos, allowedTypes }: BlockEdit
                   >
                     <ChevronDown className="h-4 w-4" />
                   </button>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      if (confirm("Opravdu smazat tento blok?")) remove(i);
-                    }}
-                    className="rounded p-1.5 text-red-700 transition-colors hover:bg-red-50"
-                    aria-label="Smazat blok"
+                  <ConfirmDialog
+                    title="Opravdu smazat tento blok?"
+                    description="Obsah bloku bude odstraněn z editoru. Změny se projeví až po uložení stránky."
+                    onConfirm={() => remove(i)}
                   >
-                    <Trash2 className="h-4 w-4" />
-                  </button>
+                    <button
+                      type="button"
+                      className="rounded p-1.5 text-red-700 transition-colors hover:bg-red-50"
+                      aria-label="Smazat blok"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </button>
+                  </ConfirmDialog>
                 </div>
               </div>
               <BlockFields block={b} onChange={(n) => update(i, n)} photoMap={photoMap} photos={photos} />

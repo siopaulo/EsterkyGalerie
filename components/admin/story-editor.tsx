@@ -9,17 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
+import { ConfirmDialog } from "@/components/admin/confirm-dialog";
 import { PhotoPicker, PhotoChip, type PhotoLite } from "@/components/admin/photo-picker";
 import { BlockEditor, type BlockDraft } from "@/components/admin/block-editor";
 import { slugify } from "@/lib/slug";
@@ -181,28 +171,15 @@ export function StoryEditor({
           <Button onClick={saveAll} className="w-full" variant="primary">
             <Save className="h-4 w-4" /> Uložit vše
           </Button>
-          <AlertDialog>
-            <AlertDialogTrigger asChild>
-              <Button type="button" variant="destructive" className="mt-3 w-full">
-                <Trash2 className="h-4 w-4" /> Smazat příběh
-              </Button>
-            </AlertDialogTrigger>
-            <AlertDialogContent>
-              <AlertDialogHeader>
-                <AlertDialogTitle>Smazat příběh?</AlertDialogTitle>
-                <AlertDialogDescription>
-                  Příběh bude odstraněn včetně všech modulů. Fotky zůstanou v galerii –
-                  smazat je můžete individuálně v galerii.
-                </AlertDialogDescription>
-              </AlertDialogHeader>
-              <AlertDialogFooter>
-                <AlertDialogCancel>Zrušit</AlertDialogCancel>
-                <AlertDialogAction className="bg-red-700 text-white hover:bg-red-800" onClick={onDelete}>
-                  Smazat
-                </AlertDialogAction>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialog>
+          <ConfirmDialog
+            title="Opravdu smazat tento příběh?"
+            description="Příběh bude odstraněn včetně všech modulů. Navázané fotografie zůstanou v galerii – můžete je smazat individuálně."
+            onConfirm={onDelete}
+          >
+            <Button type="button" variant="destructive" className="mt-3 w-full">
+              <Trash2 className="h-4 w-4" /> Smazat příběh
+            </Button>
+          </ConfirmDialog>
         </div>
 
         <div className="rounded-lg border border-border bg-background p-6">

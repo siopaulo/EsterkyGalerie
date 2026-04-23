@@ -11,17 +11,7 @@ import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
+import { ConfirmDialog } from "@/components/admin/confirm-dialog";
 import { upsertPhotoAction, softDeletePhotoAction } from "@/features/photos/actions";
 import type { Photo, Tag } from "@/types/database";
 
@@ -96,6 +86,7 @@ export function PhotoEditor({ photo, initialTagSlugs, availableTags, usage }: Ph
       console.error(err);
       toast.error(err instanceof Error ? err.message : "Smazání selhalo.");
       setDeleting(false);
+      throw err;
     }
   }
 
@@ -176,27 +167,21 @@ export function PhotoEditor({ photo, initialTagSlugs, availableTags, usage }: Ph
       </div>
 
       <div className="flex items-center justify-between gap-3 border-t border-border pt-5">
-        <AlertDialog>
-          <AlertDialogTrigger asChild>
-            <Button type="button" variant="destructive">
-              <Trash2 className="h-4 w-4" /> Smazat
-            </Button>
-          </AlertDialogTrigger>
-          <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogTitle>Smazat fotku?</AlertDialogTitle>
-              <AlertDialogDescription>
-                Fotka bude skryta z webu (soft-delete).
-                {usage.total > 0 ? (
-                  <>
-                    <br /><strong>Pozor:</strong> fotka je používaná ({usage.total}×). Ve webu se místo ní zobrazí placeholder.
-                  </>
-                ) : (
-                  <> Můžete zvolit, zda smazat i originál z Cloudinary.</>
-                )}
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            {usage.total === 0 ? (
+        <ConfirmDialog
+          title="Opravdu smazat tuto fotografii?"
+          description={
+            usage.total > 0 ? (
+              <>
+                Fotografie bude skryta z webu. <strong>Je používaná na jiných místech ({usage.total}×)</strong> – místo ní se zobrazí placeholder.
+              </>
+            ) : (
+              <>Fotografie bude skryta z webu. Není nikde použita – můžete ji bezpečně smazat i z Cloudinary.</>
+            )
+          }
+          onConfirm={onDelete}
+          loading={deleting}
+          extraContent={
+            usage.total === 0 ? (
               <label className="flex items-center gap-2 text-sm">
                 <Checkbox
                   checked={deleteFromCloudinary}
@@ -204,19 +189,13 @@ export function PhotoEditor({ photo, initialTagSlugs, availableTags, usage }: Ph
                 />
                 <span>Smazat i z Cloudinary</span>
               </label>
-            ) : null}
-            <AlertDialogFooter>
-              <AlertDialogCancel disabled={deleting}>Zrušit</AlertDialogCancel>
-              <AlertDialogAction
-                className="bg-red-700 text-white hover:bg-red-800"
-                onClick={onDelete}
-                disabled={deleting}
-              >
-                {deleting ? "Mažu…" : "Smazat"}
-              </AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
+            ) : null
+          }
+        >
+          <Button type="button" variant="destructive">
+            <Trash2 className="h-4 w-4" /> Smazat
+          </Button>
+        </ConfirmDialog>
 
         <Button type="button" variant="primary" onClick={save} disabled={saving}>
           <Save className="h-4 w-4" /> {saving ? "Ukládám…" : "Uložit změny"}

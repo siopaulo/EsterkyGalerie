@@ -6,13 +6,15 @@ const VERIFY_URL = "https://challenges.cloudflare.com/turnstile/v0/siteverify";
 export async function verifyTurnstile(token: string | null | undefined, ip?: string | null) {
   const secret = serverEnv.turnstile.secret;
   if (!secret) {
-    // Turnstile je volitelný – když není nakonfigurovaný (ani v produkci),
-    // propustíme. Ochranu pak drží rate-limit + honeypot v /api/contact.
-    // Jakmile nastavíš TURNSTILE_SECRET_KEY (a NEXT_PUBLIC_TURNSTILE_SITE_KEY),
-    // ověření se automaticky zapne.
+    // Produkce BEZ TURNSTILE_SECRET_KEY je chyba konfigurace – nechceme
+    // tichý bypass. Dev mód propustíme, abys mohl vyvíjet lokálně.
+    // Pro lokální testování s oficiálními „always-pass" test keys od Cloudflare
+    // stačí nastavit reálné klíče (i v devu) – ověření proběhne normálně.
     if (process.env.NODE_ENV === "production") {
-      console.warn("[turnstile] TURNSTILE_SECRET_KEY není nastaven – ověření vypnuto.");
-      return { success: true as const, reason: "disabled" as const };
+      console.warn(
+        "[turnstile] TURNSTILE_SECRET_KEY není nastaven v produkci – ověření selže rychle.",
+      );
+      return { success: false, reason: "not-configured" as const };
     }
     return { success: true as const, reason: "dev-bypass" as const };
   }

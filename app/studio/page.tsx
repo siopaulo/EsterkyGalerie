@@ -9,14 +9,21 @@ import { Upload, BookOpen, FileText, Mail } from "lucide-react";
 export default async function DashboardPage() {
   const { supabase } = await requireAdmin();
 
-  const [{ count: photoCount }, { count: storyCount }, { count: unread }, { data: recentMessages }, { data: recentStories }] =
-    await Promise.all([
-      supabase.from("photos").select("id", { count: "exact", head: true }).is("deleted_at", null),
-      supabase.from("stories").select("id", { count: "exact", head: true }),
-      supabase.from("contact_messages").select("id", { count: "exact", head: true }).eq("handled", false),
-      supabase.from("contact_messages").select("id, name, email, subject, created_at, handled").order("created_at", { ascending: false }).limit(5),
-      supabase.from("stories").select("id, title, slug, updated_at").order("updated_at", { ascending: false }).limit(5),
-    ]);
+  const [
+    { count: photoCount },
+    { count: storyCount },
+    { count: unread },
+    { count: pendingReviews },
+    { data: recentMessages },
+    { data: recentStories },
+  ] = await Promise.all([
+    supabase.from("photos").select("id", { count: "exact", head: true }).is("deleted_at", null),
+    supabase.from("stories").select("id", { count: "exact", head: true }),
+    supabase.from("contact_messages").select("id", { count: "exact", head: true }).eq("handled", false),
+    supabase.from("reviews").select("id", { count: "exact", head: true }).eq("approved", false),
+    supabase.from("contact_messages").select("id, name, email, subject, created_at, handled").order("created_at", { ascending: false }).limit(5),
+    supabase.from("stories").select("id, title, slug, updated_at").order("updated_at", { ascending: false }).limit(5),
+  ]);
 
   return (
     <>
@@ -41,10 +48,11 @@ export default async function DashboardPage() {
         }
       />
 
-      <div className="grid gap-6 px-6 py-8 md:grid-cols-4 md:px-10">
+      <div className="grid gap-6 px-6 py-8 md:grid-cols-5 md:px-10">
         <Stat label="Fotografie" value={photoCount ?? 0} href="/studio/galerie" />
         <Stat label="Příběhy" value={storyCount ?? 0} href="/studio/pribehy" />
         <Stat label="Nové zprávy" value={unread ?? 0} href="/studio/kontakty" tone="accent" />
+        <Stat label="Reference ke schválení" value={pendingReviews ?? 0} href="/studio/recenze" tone={pendingReviews && pendingReviews > 0 ? "accent" : undefined} />
         <Stat label="Stránky" value={5} href="/studio/stranky" />
       </div>
 

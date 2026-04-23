@@ -3,14 +3,14 @@ import { contactSchema } from "@/features/contact/schema";
 import { verifyTurnstile } from "@/lib/turnstile";
 import { sendContactEmail } from "@/lib/resend";
 import { createSupabaseAdmin } from "@/lib/supabase/admin";
-import { rateLimit, hashIp } from "@/lib/rate-limit";
+import { getClientIp, hashIp, rateLimit } from "@/lib/rate-limit";
 import { log } from "@/lib/logger";
 import { serverEnv } from "@/lib/env";
 
 export const runtime = "nodejs";
 
 export async function POST(request: NextRequest) {
-  const ip = clientIp(request);
+  const ip = getClientIp(request);
   const rl = rateLimit(`contact:${ip}`, 5, 60 * 60 * 1000);
   if (!rl.success) {
     return NextResponse.json(
@@ -106,13 +106,4 @@ export async function POST(request: NextRequest) {
   }
 
   return NextResponse.json({ ok: true, emailDelivered: emailResult.sent });
-}
-
-function clientIp(req: NextRequest): string {
-  const header =
-    req.headers.get("x-forwarded-for") ??
-    req.headers.get("cf-connecting-ip") ??
-    req.headers.get("x-real-ip") ??
-    "";
-  return header.split(",")[0]?.trim() || "0.0.0.0";
 }
