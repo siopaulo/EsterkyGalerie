@@ -45,7 +45,7 @@ export default async function OMnePage() {
           {data.page.title}
         </h1>
         {data.page.intro ? (
-          <p className="mt-6 max-w-2xl text-lg text-muted-foreground">{data.page.intro}</p>
+          <p className="mt-6 max-w-2xl whitespace-pre-line text-lg text-muted-foreground">{data.page.intro}</p>
         ) : null}
       </header>
 

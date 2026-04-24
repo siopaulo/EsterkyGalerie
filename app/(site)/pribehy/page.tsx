@@ -75,7 +75,7 @@ export default async function StoriesPage({ searchParams }: { searchParams: SP }
                     {s.title}
                   </h2>
                   {s.excerpt ? (
-                    <p className="mt-2 line-clamp-3 text-muted-foreground">{s.excerpt}</p>
+                    <p className="mt-2 line-clamp-3 whitespace-pre-line text-muted-foreground">{s.excerpt}</p>
                   ) : null}
                   {s.tags.length > 0 ? (
                     <p className="mt-3 text-xs text-muted-foreground">

@@ -64,7 +64,7 @@ export default async function KontaktPage() {
               {settings.address ? (
                 <li className="flex items-start gap-3">
                   <MapPin className="mt-0.5 h-4 w-4 text-muted-foreground" />
-                  <span className="text-foreground">{settings.address}</span>
+                  <span className="whitespace-pre-line text-foreground">{settings.address}</span>
                 </li>
               ) : null}
             </ul>

@@ -55,6 +55,22 @@ const DEFAULT_PAYLOAD: Record<BlockType, Record<string, unknown>> = {
   quote: { quote: "", author: "", context: "" },
   cta: { title: "Nadpis CTA", primary: { label: "Napsat", href: "/kontakt" } },
   faq: { items: [{ question: "Otázka?", answer: "Odpověď." }] },
+  service_cards: {
+    items: [
+      { title: "Koně a jezdci", description: "Portréty, pohyb, detail. Fotím tam, kde se cítíte doma." },
+      { title: "Osobní portrét", description: "Rodinné, partnerské nebo autoportréty v přírodě." },
+      { title: "Editorial a reportáže", description: "Koncepční focení pro značky, stáje a závody." },
+    ],
+  },
+  process_steps: {
+    heading: "Jak probíhá focení",
+    steps: [
+      { label: "01", title: "Domluva", description: "Napíšete, zjistíme si, co si přejete." },
+      { label: "02", title: "Plán", description: "Vybereme místo, čas a náladu." },
+      { label: "03", title: "Focení", description: "V klidu, bez tlaku." },
+      { label: "04", title: "Dodání", description: "Online galerie a výběr nejlepších." },
+    ],
+  },
   featured_photos: { photo_ids: [], title: "", description: "", view_all_href: "/galerie" },
   story_intro: { title: "Název příběhu", subtitle: "", date: undefined, cover_photo_id: undefined },
   home_hero: {
@@ -522,6 +538,27 @@ function BlockFields({
         </div>
       );
 
+    case "service_cards":
+      return (
+        <ServiceCardsFields
+          value={(block.payload.items as { title: string; description: string }[]) ?? []}
+          onChange={(items) => setField({ items })}
+        />
+      );
+
+    case "process_steps":
+      return (
+        <div className="space-y-4">
+          <Field label="Nadpis sekce" className="md:col-span-2">
+            <Input value={String(block.payload.heading ?? "")} onChange={(e) => setField({ heading: e.target.value })} />
+          </Field>
+          <ProcessStepsFields
+            value={(block.payload.steps as { label: string; title: string; description: string }[]) ?? []}
+            onChange={(steps) => setField({ steps })}
+          />
+        </div>
+      );
+
     case "faq":
       return (
         <FaqFields value={(block.payload.items as { question: string; answer: string }[]) ?? []} onChange={(items) => setField({ items })} />
@@ -890,6 +927,138 @@ function FaqFields({
         onClick={() => onChange([...value, { question: "", answer: "" }])}
       >
         <Plus className="h-4 w-4" /> Přidat FAQ položku
+      </Button>
+    </div>
+  );
+}
+
+function ServiceCardsFields({
+  value,
+  onChange,
+}: {
+  value: { title: string; description: string }[];
+  onChange: (items: { title: string; description: string }[]) => void;
+}) {
+  return (
+    <div className="space-y-3">
+      {value.map((item, i) => (
+        <div key={i} className="rounded-md border border-border bg-muted/30 p-4">
+          <div className="flex items-center justify-between gap-2">
+            <Label>Karta {i + 1}</Label>
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              onClick={() => onChange(value.filter((_, j) => j !== i))}
+              disabled={value.length <= 1}
+            >
+              <Trash2 className="h-4 w-4" /> Odebrat
+            </Button>
+          </div>
+          <div className="mt-2 space-y-2">
+            <Input
+              placeholder="Titulek"
+              value={item.title}
+              onChange={(e) => {
+                const copy = [...value];
+                copy[i] = { ...item, title: e.target.value };
+                onChange(copy);
+              }}
+            />
+            <Textarea
+              placeholder="Popis"
+              rows={2}
+              value={item.description}
+              onChange={(e) => {
+                const copy = [...value];
+                copy[i] = { ...item, description: e.target.value };
+                onChange(copy);
+              }}
+            />
+          </div>
+        </div>
+      ))}
+      <Button
+        type="button"
+        variant="outline"
+        onClick={() => onChange([...value, { title: "", description: "" }])}
+        disabled={value.length >= 6}
+      >
+        <Plus className="h-4 w-4" /> Přidat kartu
+      </Button>
+    </div>
+  );
+}
+
+function ProcessStepsFields({
+  value,
+  onChange,
+}: {
+  value: { label: string; title: string; description: string }[];
+  onChange: (steps: { label: string; title: string; description: string }[]) => void;
+}) {
+  return (
+    <div className="space-y-3">
+      <p className="text-xs text-muted-foreground">
+        Číslo kroku (např. 01) – nechte prázdné pro automatické 01, 02, …
+      </p>
+      {value.map((step, i) => (
+        <div key={i} className="rounded-md border border-border bg-muted/30 p-4">
+          <div className="flex items-center justify-between gap-2">
+            <Label>Krok {i + 1}</Label>
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              onClick={() => onChange(value.filter((_, j) => j !== i))}
+              disabled={value.length <= 2}
+            >
+              <Trash2 className="h-4 w-4" /> Odebrat
+            </Button>
+          </div>
+          <div className="mt-2 grid gap-2 sm:grid-cols-3">
+            <Field label="Číslo">
+              <Input
+                placeholder="01"
+                value={step.label}
+                onChange={(e) => {
+                  const copy = [...value];
+                  copy[i] = { ...step, label: e.target.value };
+                  onChange(copy);
+                }}
+              />
+            </Field>
+            <Field label="Titulek" className="sm:col-span-2">
+              <Input
+                value={step.title}
+                onChange={(e) => {
+                  const copy = [...value];
+                  copy[i] = { ...step, title: e.target.value };
+                  onChange(copy);
+                }}
+              />
+            </Field>
+            <Field label="Popis" className="sm:col-span-3">
+              <Textarea
+                rows={2}
+                value={step.description}
+                onChange={(e) => {
+                  const copy = [...value];
+                  copy[i] = { ...step, description: e.target.value };
+                  onChange(copy);
+                }}
+              />
+            </Field>
+          </div>
+        </div>
+      ))}
+      <Button
+        type="button"
+        variant="outline"
+        onClick={() => onChange([...value, { label: "", title: "", description: "" }])}
+        disabled={value.length >= 8}
+      >
+        <Plus className="h-4 w-4" /> Přidat krok
       </Button>
     </div>
   );

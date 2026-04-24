@@ -94,6 +94,36 @@ export const faqSchema = z.object({
 });
 export type FaqPayload = z.infer<typeof faqSchema>;
 
+/** Mřížka karet (např. přehled služeb) – titulek + krátký text, bez fotek. */
+export const serviceCardsSchema = z.object({
+  items: z
+    .array(
+      z.object({
+        title: z.string().min(1).max(120),
+        description: z.string().max(600).optional().default(""),
+      }),
+    )
+    .min(1)
+    .max(6),
+});
+export type ServiceCardsPayload = z.infer<typeof serviceCardsSchema>;
+
+/** Číslované kroky procesu (např. „Jak probíhá focení“). Prázdné `label` ⇒ 01, 02, … */
+export const processStepsSchema = z.object({
+  heading: z.string().min(1).max(200),
+  steps: z
+    .array(
+      z.object({
+        label: z.string().max(20).optional().default(""),
+        title: z.string().min(1).max(120),
+        description: z.string().max(600).optional().default(""),
+      }),
+    )
+    .min(2)
+    .max(8),
+});
+export type ProcessStepsPayload = z.infer<typeof processStepsSchema>;
+
 export const featuredPhotosSchema = z.object({
   photo_ids: z.array(z.string().uuid()).min(1).max(12),
   title: z.string().max(200).optional().default(""),
@@ -202,6 +232,8 @@ export const BLOCK_SCHEMAS = {
   quote: quoteSchema,
   cta: ctaSchema,
   faq: faqSchema,
+  service_cards: serviceCardsSchema,
+  process_steps: processStepsSchema,
   featured_photos: featuredPhotosSchema,
   story_intro: storyIntroSchema,
   home_hero: homeHeroSchema,
@@ -226,6 +258,8 @@ export const BLOCK_LABELS: Record<BlockType, string> = {
   quote: "Citace",
   cta: "Sekce s tlačítkem (výzva k akci)",
   faq: "Časté otázky (FAQ)",
+  service_cards: "Karty služeb (mřížka)",
+  process_steps: "Kroky procesu (číslované)",
   featured_photos: "Vybrané fotky",
   story_intro: "Úvod příběhu",
   home_hero: "Hlavní stránka – úvodní sekce s carouselem",

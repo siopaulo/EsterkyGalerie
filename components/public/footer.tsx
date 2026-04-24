@@ -18,7 +18,7 @@ export function PublicFooter({ settings }: { settings: SiteSettings }) {
           />
           <p className="font-serif text-2xl text-foreground">{settings.site_name}</p>
           {settings.site_tagline ? (
-            <p className="mt-2 text-sm text-muted-foreground">{settings.site_tagline}</p>
+            <p className="mt-2 whitespace-pre-line text-sm text-muted-foreground">{settings.site_tagline}</p>
           ) : null}
         </div>
 

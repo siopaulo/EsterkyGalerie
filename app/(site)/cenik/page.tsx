@@ -49,7 +49,7 @@ export default async function CenikPage() {
           {page?.page.title ?? "Ceník"}
         </h1>
         {page?.page.intro ? (
-          <p className="mt-6 max-w-2xl text-lg text-muted-foreground">{page.page.intro}</p>
+          <p className="mt-6 max-w-2xl whitespace-pre-line text-lg text-muted-foreground">{page.page.intro}</p>
         ) : null}
       </header>
 
@@ -67,7 +67,7 @@ export default async function CenikPage() {
                   >
                     <h3 className="font-serif text-2xl">{item.title}</h3>
                     {item.description ? (
-                      <p className="mt-2 text-sm text-muted-foreground">{item.description}</p>
+                      <p className="mt-2 whitespace-pre-line text-sm text-muted-foreground">{item.description}</p>
                     ) : null}
                     {item.price_label ? (
                       <p className="mt-4 font-serif text-3xl text-foreground">{item.price_label}</p>
@@ -77,7 +77,7 @@ export default async function CenikPage() {
                         {item.features.map((f, i) => (
                           <li key={i} className="flex items-start gap-2">
                             <Check className="mt-0.5 h-4 w-4 text-accent" />
-                            <span>{f}</span>
+                            <span className="whitespace-pre-line">{f}</span>
                           </li>
                         ))}
                       </ul>

@@ -30,7 +30,7 @@ export default async function GdprPage() {
         {data?.page.title ?? "Ochrana osobních údajů"}
       </h1>
       {data?.page.intro ? (
-        <p className="mt-4 max-w-2xl text-lg text-muted-foreground">{data.page.intro}</p>
+        <p className="mt-4 max-w-2xl whitespace-pre-line text-lg text-muted-foreground">{data.page.intro}</p>
       ) : null}
 
       <div className="mx-auto mt-10 max-w-2xl prose-editorial">

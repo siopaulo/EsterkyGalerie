@@ -74,7 +74,7 @@ export default async function StoryPage({ params }: { params: Params }) {
           {data.story.title}
         </h1>
         {data.story.excerpt ? (
-          <p className="mt-5 max-w-2xl text-lg text-muted-foreground">{data.story.excerpt}</p>
+          <p className="mt-5 max-w-2xl whitespace-pre-line text-lg text-muted-foreground">{data.story.excerpt}</p>
         ) : null}
         {data.tags.length > 0 ? (
           <div className="mt-5 flex flex-wrap gap-2">

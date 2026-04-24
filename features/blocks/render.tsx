@@ -21,6 +21,8 @@ import {
   type QuotePayload,
   type CtaPayload,
   type FaqPayload,
+  type ServiceCardsPayload,
+  type ProcessStepsPayload,
   type FeaturedPhotosPayload,
   type StoryIntroPayload,
   type HomeHeroPayload,
@@ -111,6 +113,10 @@ function renderByType(
       return <CtaBlock data={data as CtaPayload} />;
     case "faq":
       return <FaqBlock data={data as FaqPayload} />;
+    case "service_cards":
+      return <ServiceCardsBlock data={data as ServiceCardsPayload} />;
+    case "process_steps":
+      return <ProcessStepsBlock data={data as ProcessStepsPayload} />;
     case "featured_photos":
       return <FeaturedPhotosBlock data={data as FeaturedPhotosPayload} photos={photos} />;
     case "story_intro":
@@ -172,7 +178,12 @@ function HeroBlock({ data, photos }: { data: HeroPayload; photos: Map<string, Ph
           {data.title}
         </h1>
         {data.subtitle ? (
-          <p className={cn("max-w-xl text-base md:text-lg", bg ? "text-white/90" : "text-muted-foreground")}>
+          <p
+            className={cn(
+              "max-w-xl whitespace-pre-line text-base md:text-lg",
+              bg ? "text-white/90" : "text-muted-foreground",
+            )}
+          >
             {data.subtitle}
           </p>
         ) : null}
@@ -215,7 +226,7 @@ function SectionHeadingBlock({ data }: { data: SectionHeadingPayload }) {
       ) : null}
       <h2 className="font-serif text-3xl md:text-4xl">{data.title}</h2>
       {data.description ? (
-        <p className="mt-3 text-base text-muted-foreground md:text-lg">{data.description}</p>
+        <p className="mt-3 whitespace-pre-line text-base text-muted-foreground md:text-lg">{data.description}</p>
       ) : null}
     </div>
   );
@@ -241,7 +252,7 @@ function SingleImageBlock({ data, photos }: { data: SingleImagePayload; photos: 
         className="overflow-hidden rounded-md"
       />
       {data.caption ? (
-        <figcaption className="mt-3 text-center text-sm italic text-muted-foreground">
+        <figcaption className="mt-3 text-center text-sm italic whitespace-pre-line text-muted-foreground">
           {data.caption}
         </figcaption>
       ) : null}
@@ -271,7 +282,7 @@ function ImagePairBlock({ data, photos }: { data: ImagePairPayload; photos: Map<
         />
       </div>
       {data.caption ? (
-        <figcaption className="mt-3 text-center text-sm italic text-muted-foreground">
+        <figcaption className="mt-3 text-center text-sm italic whitespace-pre-line text-muted-foreground">
           {data.caption}
         </figcaption>
       ) : null}
@@ -306,7 +317,7 @@ function ImageCarouselBlock({ data, photos }: { data: ImageCarouselPayload; phot
         </div>
       </div>
       {data.caption ? (
-        <figcaption className="mt-3 text-center text-sm italic text-muted-foreground">
+        <figcaption className="mt-3 text-center text-sm italic whitespace-pre-line text-muted-foreground">
           {data.caption}
         </figcaption>
       ) : null}
@@ -340,14 +351,16 @@ function PhotoGridBlock({ data, photos }: { data: PhotoGridPayload; photos: Map<
 function QuoteBlock({ data }: { data: QuotePayload }) {
   return (
     <figure className="mx-auto max-w-2xl border-l-2 border-accent pl-6">
-      <blockquote className="font-serif text-2xl leading-snug text-foreground md:text-3xl">
+      <blockquote className="whitespace-pre-line font-serif text-2xl leading-snug text-foreground md:text-3xl">
         „{data.quote}“
       </blockquote>
       {(data.author || data.context) && (
         <figcaption className="mt-4 text-sm text-muted-foreground">
-          {data.author ? <span className="font-medium text-foreground">{data.author}</span> : null}
+          {data.author ? (
+            <span className="font-medium whitespace-pre-line text-foreground">{data.author}</span>
+          ) : null}
           {data.author && data.context ? <span> · </span> : null}
-          {data.context ? <span>{data.context}</span> : null}
+          {data.context ? <span className="whitespace-pre-line">{data.context}</span> : null}
         </figcaption>
       )}
     </figure>
@@ -359,7 +372,7 @@ function CtaBlock({ data }: { data: CtaPayload }) {
     <section className="mx-auto max-w-4xl rounded-xl border border-border bg-muted/40 p-10 text-center">
       <h2 className="font-serif text-3xl md:text-4xl">{data.title}</h2>
       {data.description ? (
-        <p className="mx-auto mt-3 max-w-xl text-muted-foreground">{data.description}</p>
+        <p className="mx-auto mt-3 max-w-xl whitespace-pre-line text-muted-foreground">{data.description}</p>
       ) : null}
       <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
         <Button asChild size="lg" variant="primary">
@@ -382,15 +395,63 @@ function FaqBlock({ data }: { data: FaqPayload }) {
         {data.items.map((item, i) => (
           <details key={i} className="group py-5">
             <summary className="flex cursor-pointer list-none items-start justify-between gap-4 text-left">
-              <dt className="font-serif text-xl text-foreground">{item.question}</dt>
+              <dt className="font-serif text-xl whitespace-pre-line text-foreground">{item.question}</dt>
               <span className="mt-1 text-muted-foreground transition-transform group-open:rotate-45">
                 +
               </span>
             </summary>
-            <dd className="mt-3 text-base leading-relaxed text-muted-foreground">{item.answer}</dd>
+            <dd className="mt-3 whitespace-pre-line text-base leading-relaxed text-muted-foreground">{item.answer}</dd>
           </details>
         ))}
       </dl>
+    </div>
+  );
+}
+
+function ServiceCardsBlock({ data }: { data: ServiceCardsPayload }) {
+  return (
+    <div className="pb-10">
+      <div className="grid gap-10 md:grid-cols-3">
+        {data.items.map((item, i) => (
+          <div key={`${i}-${item.title}`} className="rounded-lg border border-border p-6">
+            <h3 className="font-serif text-2xl">{item.title}</h3>
+            {item.description ? (
+              <p className="mt-2 whitespace-pre-line text-muted-foreground">{item.description}</p>
+            ) : null}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function processStepLabel(label: string | undefined, index: number): string {
+  const t = label?.trim();
+  if (t) return t;
+  return String(index + 1).padStart(2, "0");
+}
+
+function ProcessStepsBlock({ data }: { data: ProcessStepsPayload }) {
+  const cols =
+    data.steps.length <= 2
+      ? "md:grid-cols-2"
+      : data.steps.length === 3
+        ? "md:grid-cols-3"
+        : "md:grid-cols-4";
+  return (
+    <div className="py-16">
+      <h2 className="font-serif text-3xl md:text-4xl">{data.heading}</h2>
+      <ol className={cn("mt-8 grid gap-6", cols)}>
+        {data.steps.map((step, i) => (
+          <li key={i} className="rounded-lg bg-muted/40 p-6">
+            <p className="font-serif text-xl text-accent">{processStepLabel(step.label, i)}</p>
+            <p className="mt-1 font-serif text-xl">{step.title}</p>
+            {step.description ? (
+              <p className="mt-2 whitespace-pre-line text-sm text-muted-foreground">{step.description}</p>
+            ) : null}
+          </li>
+        ))}
+      </ol>
     </div>
   );
 }
@@ -405,7 +466,7 @@ function FeaturedPhotosBlock({ data, photos }: { data: FeaturedPhotosPayload; ph
           <div>
             {data.title ? <h2 className="font-serif text-3xl md:text-4xl">{data.title}</h2> : null}
             {data.description ? (
-              <p className="mt-2 max-w-lg text-muted-foreground">{data.description}</p>
+              <p className="mt-2 max-w-lg whitespace-pre-line text-muted-foreground">{data.description}</p>
             ) : null}
           </div>
           {data.view_all_href ? (
@@ -445,7 +506,7 @@ function StoryIntroBlock({ data, photos }: { data: StoryIntroPayload; photos: Ma
       ) : null}
       <h1 className="font-serif text-4xl md:text-6xl">{data.title}</h1>
       {data.subtitle ? (
-        <p className="mx-auto mt-4 max-w-2xl text-lg text-muted-foreground">{data.subtitle}</p>
+        <p className="mx-auto mt-4 max-w-2xl whitespace-pre-line text-lg text-muted-foreground">{data.subtitle}</p>
       ) : null}
       {cover ? (
         <div className="mt-10 overflow-hidden rounded-md">
@@ -505,7 +566,7 @@ function HomeHeroBlock({
             {data.title}
           </h1>
           {data.subtitle ? (
-            <p className="mt-6 max-w-lg text-lg text-muted-foreground md:text-xl">
+            <p className="mt-6 max-w-lg whitespace-pre-line text-lg text-muted-foreground md:text-xl">
               {data.subtitle}
             </p>
           ) : null}
@@ -546,7 +607,7 @@ function HomeAboutBlock({ data }: { data: HomeAboutPayload }) {
         </div>
         <div className="text-lg leading-relaxed text-foreground/80">
           {data.paragraphs.map((p, i) => (
-            <p key={i} className={i > 0 ? "mt-4" : undefined}>
+            <p key={i} className={cn("whitespace-pre-line", i > 0 && "mt-4")}>
               {p}
             </p>
           ))}
@@ -630,7 +691,7 @@ function HomeServiceCtaBlock({ data }: { data: HomeServiceCtaPayload }) {
           ) : null}
           <h2 className="mt-3 font-serif text-4xl md:text-5xl">{data.title}</h2>
           {data.description ? (
-            <p className="mt-5 text-lg text-muted-foreground">{data.description}</p>
+            <p className="mt-5 whitespace-pre-line text-lg text-muted-foreground">{data.description}</p>
           ) : null}
           {(data.cta_primary || data.cta_secondary) && (
             <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
@@ -703,7 +764,7 @@ function HomeStoriesFeedBlock({
                 {s.title}
               </h3>
               {s.excerpt ? (
-                <p className="mt-2 line-clamp-2 text-muted-foreground">{s.excerpt}</p>
+                <p className="mt-2 line-clamp-2 whitespace-pre-line text-muted-foreground">{s.excerpt}</p>
               ) : null}
             </Link>
           </li>
