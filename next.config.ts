@@ -5,7 +5,7 @@ const isProd = process.env.NODE_ENV === "production";
 
 /**
  * CSP v produkci – vyvážení bezpečnosti a Next.js (inline styly / skripty).
- * Turnstile, Cloudinary, Supabase a Cloudflare Analytics musí zůstat povolené.
+ * Turnstile, Cloudinary (obrázky + signed upload z klienta), Supabase a Cloudflare Analytics musí zůstat povolené.
  */
 const contentSecurityPolicy = [
   "default-src 'self'",
@@ -13,7 +13,7 @@ const contentSecurityPolicy = [
   "style-src 'self' 'unsafe-inline'",
   "img-src 'self' data: blob: https://res.cloudinary.com",
   "font-src 'self' data: https://fonts.gstatic.com",
-  "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://cloudflareinsights.com https://vitals.vercel-analytics.com https://*.ingest.de.sentry.io https://*.ingest.us.sentry.io https://*.ingest.sentry.io",
+  "connect-src 'self' https://api.cloudinary.com https://*.supabase.co wss://*.supabase.co https://cloudflareinsights.com https://vitals.vercel-analytics.com https://*.ingest.de.sentry.io https://*.ingest.us.sentry.io https://*.ingest.sentry.io",
   "frame-src https://challenges.cloudflare.com",
   "worker-src 'self' blob:",
   "object-src 'none'",
