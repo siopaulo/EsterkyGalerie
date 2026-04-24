@@ -109,7 +109,7 @@ export function ReviewsTable({ rows, total, pending, approved, filters }: Review
 
   return (
     <div className="space-y-5">
-      <div className="flex flex-wrap items-end justify-between gap-3">
+      <div className="flex max-w-full flex-col gap-3 md:flex-row md:flex-wrap md:items-end md:justify-between">
         <div className="flex flex-wrap items-center gap-2 text-sm">
           <FilterPill
             active={filters.status === "all"}
@@ -132,7 +132,7 @@ export function ReviewsTable({ rows, total, pending, approved, filters }: Review
           </FilterPill>
         </div>
 
-        <div className="flex flex-wrap items-center gap-3">
+        <div className="flex max-w-full flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
           <label className="inline-flex items-center gap-2 text-sm text-muted-foreground">
             Hvězdičky
             <select
@@ -181,8 +181,8 @@ export function ReviewsTable({ rows, total, pending, approved, filters }: Review
           </p>
         </div>
       ) : (
-        <div className="overflow-hidden rounded-lg border border-border bg-background">
-          <table className="w-full text-sm">
+        <div className="w-full max-w-full overflow-x-auto rounded-lg border border-border bg-background">
+          <table className="w-full min-w-[800px] text-sm">
             <thead className="bg-muted/40 text-left text-xs uppercase tracking-wider text-muted-foreground">
               <tr>
                 <th className="px-5 py-3">Stav</th>

@@ -14,6 +14,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
 import { cldUrl } from "@/lib/cloudinary-url";
 import { log } from "@/lib/logger";
+import { cn } from "@/lib/utils";
 import { upsertPhotoAction } from "@/features/photos/actions";
 import type { Tag } from "@/types/database";
 
@@ -24,6 +25,8 @@ interface PhotoUploaderProps {
   availableTags: Tag[];
   triggerLabel?: string;
   autoOpen?: boolean;
+  /** Na mobilu přidá plovoucí tlačítko (FAB); hlavní trigger zůstane skrytý pod `md` při `true`. */
+  showMobileFab?: boolean;
 }
 
 interface UploadedMeta {
@@ -35,7 +38,12 @@ interface UploadedMeta {
   format: string;
 }
 
-export function PhotoUploader({ availableTags, triggerLabel = "Nahrát fotku", autoOpen = false }: PhotoUploaderProps) {
+export function PhotoUploader({
+  availableTags,
+  triggerLabel = "Nahrát fotku",
+  autoOpen = false,
+  showMobileFab = false,
+}: PhotoUploaderProps) {
   const router = useRouter();
   const [open, setOpen] = useState(autoOpen);
   const [stage, setStage] = useState<"pick" | "uploading" | "meta">("pick");
@@ -181,12 +189,28 @@ export function PhotoUploader({ availableTags, triggerLabel = "Nahrát fotku", a
 
   return (
     <>
-      <Button variant="primary" onClick={() => setOpen(true)}>
+      <Button
+        variant="primary"
+        className={cn(showMobileFab && "hidden md:inline-flex")}
+        onClick={() => setOpen(true)}
+      >
         <Upload className="h-4 w-4" />
         {triggerLabel}
       </Button>
+      {showMobileFab ? (
+        <Button
+          type="button"
+          variant="primary"
+          size="icon"
+          className="fixed bottom-6 right-4 z-30 h-14 w-14 rounded-full shadow-lg md:hidden"
+          aria-label={triggerLabel}
+          onClick={() => setOpen(true)}
+        >
+          <Upload className="h-6 w-6" />
+        </Button>
+      ) : null}
       <Dialog open={open} onOpenChange={(v) => { setOpen(v); if (!v) reset(); }}>
-        <DialogContent className="max-w-2xl">
+        <DialogContent className="max-h-[90dvh] w-[calc(100%-2rem)] max-w-2xl overflow-y-auto sm:w-full">
           <DialogHeader>
             <DialogTitle>Nahrát fotku</DialogTitle>
             <DialogDescription>

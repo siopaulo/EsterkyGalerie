@@ -57,7 +57,7 @@ export default async function StudioStoryEditPage({ params }: { params: Params }
           </Button>
         }
       />
-      <section className="px-6 py-8 md:px-10">
+      <section className="max-w-full px-4 py-8 md:px-10">
         <StoryEditor
           story={story as Story}
           blocks={(blocks ?? []) as StoryBlock[]}

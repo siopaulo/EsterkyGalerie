@@ -50,7 +50,7 @@ export default async function DashboardPage() {
         }
       />
 
-      <div className="grid gap-6 px-6 py-8 md:grid-cols-5 md:px-10">
+      <div className="grid max-w-full gap-6 px-4 py-8 md:grid-cols-5 md:px-10">
         <Stat label="Fotografie" value={photoCount ?? 0} href="/studio/galerie" />
         <Stat label="Příběhy" value={storyCount ?? 0} href="/studio/pribehy" />
         <Stat label="Nové zprávy" value={unread ?? 0} href="/studio/kontakty" tone="accent" />
@@ -58,7 +58,7 @@ export default async function DashboardPage() {
         <Stat label="Stránky" value={pageCount ?? 0} href="/studio/stranky" />
       </div>
 
-      <div className="grid gap-6 px-6 pb-10 md:grid-cols-2 md:px-10">
+      <div className="grid max-w-full gap-6 px-4 pb-10 md:grid-cols-2 md:px-10">
         <Card>
           <CardHeader>
             <CardTitle>Poslední zprávy</CardTitle>

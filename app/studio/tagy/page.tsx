@@ -14,7 +14,7 @@ export default async function StudioTagsPage() {
         title="Tagy"
         description="Štítky pro fotky i příběhy. Mazáním se odstraní ze všech navázaných položek."
       />
-      <section className="max-w-3xl px-6 py-8 md:px-10">
+      <section className="mx-auto max-w-full px-4 py-8 md:max-w-3xl md:px-10">
         <TagsManager initialTags={(data ?? []) as Tag[]} />
       </section>
     </>

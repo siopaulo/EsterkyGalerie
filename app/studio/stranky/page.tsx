@@ -23,9 +23,9 @@ export default async function StudioPagesIndex() {
         title="Stránky"
         description="Statické stránky webu s modulárním obsahem. Hlavní stránka je speciální – skládá se ze stejných modulů."
       />
-      <section className="px-6 py-8 md:px-10">
-        <div className="overflow-hidden rounded-lg border border-border bg-background">
-          <table className="w-full text-sm">
+      <section className="max-w-full px-4 py-8 md:px-10">
+        <div className="w-full max-w-full overflow-x-auto rounded-lg border border-border bg-background">
+          <table className="w-full min-w-[560px] text-sm">
             <thead className="bg-muted/40 text-left text-xs uppercase tracking-wider text-muted-foreground">
               <tr>
                 <th className="px-5 py-3">Název</th>

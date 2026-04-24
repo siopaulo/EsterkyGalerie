@@ -68,7 +68,7 @@ export default async function StudioReviewsPage({
         title="Reference"
         description="Veřejné recenze z formuláře na /reference. Schválené se zobrazují na webu, ostatní čekají na tvé posouzení."
       />
-      <section className="px-6 py-8 md:px-10">
+      <section className="max-w-full px-4 py-8 md:px-10">
         <ReviewsTable
           rows={rows}
           total={count ?? 0}

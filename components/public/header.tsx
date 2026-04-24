@@ -57,14 +57,14 @@ export function PublicHeader({ siteName, tagline }: HeaderProps) {
           className="group flex items-center gap-3 text-foreground"
           aria-label={siteName}
         >
-          <span className="relative inline-flex h-11 w-11 items-center justify-center rounded-full bg-background/60 ring-1 ring-border transition-all group-hover:ring-accent/60 group-hover:shadow-sm">
+          <span className="relative inline-flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-full bg-background/60 ring-1 ring-border transition-all group-hover:ring-accent/60 group-hover:shadow-sm">
             <Image
               src="/logo.png"
               alt=""
               width={44}
               height={44}
               priority
-              className="h-9 w-9 object-contain"
+              className="h-full w-full object-cover"
             />
           </span>
           <span className="flex flex-col leading-none">

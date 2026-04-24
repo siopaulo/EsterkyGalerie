@@ -16,14 +16,14 @@ interface GalleryFilterFormProps {
 export function GalleryFilterForm({ q, visibility, totalCount }: GalleryFilterFormProps) {
   return (
     <form
-      className="mb-6 flex flex-wrap items-center gap-3"
+      className="mb-6 flex max-w-full flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center"
       method="get"
       onChange={(e) => {
         const el = e.target;
         if (el instanceof HTMLSelectElement) el.form?.requestSubmit();
       }}
     >
-      <Input name="q" defaultValue={q} placeholder="Hledat…" className="max-w-xs" />
+      <Input name="q" defaultValue={q} placeholder="Hledat…" className="w-full min-w-0 max-w-full sm:max-w-xs" />
       <select
         name="v"
         defaultValue={visibility}
@@ -42,7 +42,7 @@ export function GalleryFilterForm({ q, visibility, totalCount }: GalleryFilterFo
           Vymazat
         </Link>
       ) : null}
-      <p className="ml-auto text-sm text-muted-foreground">{totalCount} položek</p>
+      <p className="text-sm text-muted-foreground sm:ml-auto">{totalCount} položek</p>
     </form>
   );
 }

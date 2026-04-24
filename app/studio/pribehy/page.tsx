@@ -49,27 +49,29 @@ export default async function StudioStoriesPage({ searchParams }: { searchParams
           </Button>
         }
       />
-      <section className="px-6 py-8 md:px-10">
-        <form className="mb-6 flex flex-wrap items-center gap-3" method="get">
+      <section className="max-w-full px-4 py-8 md:px-10">
+        <form className="mb-6 flex max-w-full flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center" method="get">
           <Input
             name="q"
             defaultValue={q}
             placeholder="Hledat v názvu…"
-            className="max-w-xs"
+            className="w-full min-w-0 max-w-full sm:max-w-xs"
             aria-label="Hledat v názvu nebo slugu"
           />
-          <button type="submit" className="h-10 rounded-md border border-border px-4 text-sm hover:bg-muted">
-            Hledat
-          </button>
-          {q ? (
-            <Link
-              href="/studio/pribehy"
-              className="text-sm text-muted-foreground underline underline-offset-4"
-            >
-              Vymazat
-            </Link>
-          ) : null}
-          <p className="ml-auto text-sm text-muted-foreground">{total} položek</p>
+          <div className="flex flex-wrap items-center gap-3">
+            <button type="submit" className="h-10 rounded-md border border-border px-4 text-sm hover:bg-muted">
+              Hledat
+            </button>
+            {q ? (
+              <Link
+                href="/studio/pribehy"
+                className="text-sm text-muted-foreground underline underline-offset-4"
+              >
+                Vymazat
+              </Link>
+            ) : null}
+          </div>
+          <p className="text-sm text-muted-foreground sm:ml-auto">{total} položek</p>
         </form>
 
         {total === 0 ? (
@@ -87,8 +89,8 @@ export default async function StudioStoriesPage({ searchParams }: { searchParams
             <p className="mt-2 text-sm text-muted-foreground">Zkuste předchozí stránku nebo upravte hledání.</p>
           </div>
         ) : (
-          <div className="overflow-hidden rounded-lg border border-border bg-background">
-            <table className="w-full text-sm">
+          <div className="w-full max-w-full overflow-x-auto rounded-lg border border-border bg-background">
+            <table className="w-full min-w-[720px] text-sm">
               <thead className="bg-muted/40 text-left text-xs uppercase tracking-wider text-muted-foreground">
                 <tr>
                   <th className="px-5 py-3">Název</th>

@@ -69,7 +69,7 @@ export default async function StudioContactsPage({ searchParams }: { searchParam
           </Button>
         }
       />
-      <section className="px-6 py-8 md:px-10">
+      <section className="max-w-full px-4 py-8 md:px-10">
         <div className="mb-6 flex flex-wrap gap-2 border-b border-border pb-4">
           <Link
             href="/studio/kontakty?tab=received"

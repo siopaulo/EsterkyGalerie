@@ -101,7 +101,7 @@ export function SettingsEditor({ settings, availablePhotos, availableStories }: 
   }
 
   return (
-    <div className="grid gap-8 lg:grid-cols-[1fr_320px]">
+    <div className="grid max-w-full gap-8 lg:grid-cols-[1fr_320px]">
       <div className="space-y-8">
         <Card title="Značka">
           <Field label="Název webu">

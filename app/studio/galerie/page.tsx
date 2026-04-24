@@ -55,11 +55,12 @@ export default async function StudioGalleryPage({ searchParams }: { searchParams
           <PhotoUploader
             availableTags={(tags ?? []) as Tag[]}
             autoOpen={autoOpen}
+            showMobileFab
           />
         }
       />
 
-      <section className="px-6 py-6 md:px-10 md:py-8">
+      <section className="max-w-full px-4 py-6 pb-24 md:px-10 md:py-8 md:pb-8">
         <GalleryFilterForm q={q} visibility={visibility} totalCount={count ?? 0} />
 
         {(count ?? 0) === 0 ? (

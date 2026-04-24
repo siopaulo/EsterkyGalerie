@@ -227,11 +227,13 @@ export function PhotoChip({
   }
   return (
     <div className="flex items-center gap-3 rounded-md border border-border bg-background p-2">
-      <img
-        src={cldUrl(photo.cloudinary_public_id, { width: 120, crop: "fill", gravity: "auto" })}
-        alt=""
-        className="h-12 w-12 rounded object-cover"
-      />
+      <span className="h-12 w-12 shrink-0 overflow-hidden rounded-full">
+        <img
+          src={cldUrl(photo.cloudinary_public_id, { width: 120, crop: "fill", gravity: "auto" })}
+          alt=""
+          className="h-full w-full object-cover"
+        />
+      </span>
       <div className="min-w-0 flex-1">
         <p className="truncate text-sm">{photo.display_name}</p>
         <p className="text-xs text-muted-foreground">{photo.visibility === "hidden" ? "skrytá" : "veřejná"}</p>

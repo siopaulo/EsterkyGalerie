@@ -22,8 +22,8 @@ export function SentRepliesTable({ rows }: { rows: SentReplyRow[] }) {
   }
 
   return (
-    <div className="overflow-hidden rounded-lg border border-border bg-background">
-      <table className="w-full text-sm">
+    <div className="w-full max-w-full overflow-x-auto rounded-lg border border-border bg-background">
+      <table className="w-full min-w-[640px] text-sm">
         <thead className="bg-muted/40 text-left text-xs uppercase tracking-wider text-muted-foreground">
           <tr>
             <th className="px-5 py-3">Odesláno</th>

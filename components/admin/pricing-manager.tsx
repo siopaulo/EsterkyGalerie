@@ -144,9 +144,10 @@ function PricingRow({
         </div>
         <div>
           <Label>Výhody (odrážky)</Label>
-          <div className="flex gap-2">
+          <div className="flex max-w-full flex-col gap-2 sm:flex-row">
             <Input
               placeholder="Např. 30 upravených fotek"
+              className="min-w-0 flex-1"
               value={featureInput}
               onChange={(e) => setFeatureInput(e.target.value)}
               onKeyDown={(e) => {
@@ -193,7 +194,7 @@ function PricingRow({
           ) : null}
         </div>
       </div>
-      <div className="mt-5 flex justify-between">
+      <div className="mt-5 flex flex-col-reverse gap-3 sm:flex-row sm:justify-between">
         {isDraft ? (
           <Button variant="ghost" className="text-red-700" onClick={onDelete}>
             <Trash2 className="h-4 w-4" /> Zahodit

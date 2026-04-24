@@ -14,7 +14,7 @@ export default async function StudioPricingPage() {
         title="Ceník"
         description="Balíčky a doplňky. Každá položka má název, cenu, popis a seznam výhod."
       />
-      <section className="px-6 py-8 md:px-10">
+      <section className="max-w-full px-4 py-8 md:px-10">
         <PricingManager initial={(data ?? []) as PricingItem[]} />
       </section>
     </>

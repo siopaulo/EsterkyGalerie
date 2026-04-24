@@ -41,8 +41,8 @@ export default async function PhotoDetail({ params }: { params: Params }) {
           { label: (photo as Photo).display_name },
         ]}
       />
-      <section className="grid gap-10 px-6 py-8 md:grid-cols-[1fr_420px] md:px-10">
-        <div className="overflow-hidden rounded-md border border-border bg-muted">
+      <section className="grid max-w-full gap-10 px-4 py-8 md:grid-cols-[1fr_420px] md:px-10">
+        <div className="min-w-0 overflow-hidden rounded-md border border-border bg-muted">
           <Image
             src={cldUrl((photo as Photo).cloudinary_public_id, { width: 1200 })}
             alt={(photo as Photo).alt_text || (photo as Photo).display_name}
@@ -63,7 +63,7 @@ export default async function PhotoDetail({ params }: { params: Params }) {
             </p>
           </div>
         </div>
-        <div className="space-y-6">
+        <div className="min-w-0 space-y-6">
           <PhotoEditor
             photo={photo as Photo}
             initialTagSlugs={initialTagSlugs}

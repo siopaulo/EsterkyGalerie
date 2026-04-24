@@ -29,7 +29,7 @@ export default async function StudioSettingsPage() {
         title="Nastavení webu"
         description="Globální nastavení značky, kontaktů a featured obsahu."
       />
-      <section className="px-6 py-8 md:px-10">
+      <section className="max-w-full px-4 py-8 md:px-10">
         <SettingsEditor
           settings={settings as SiteSettings}
           availablePhotos={((photos ?? []) as Pick<Photo, "id" | "display_name" | "cloudinary_public_id" | "alt_text" | "visibility">[])}

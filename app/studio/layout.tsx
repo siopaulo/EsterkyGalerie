@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { AdminSidebar } from "@/components/admin/sidebar";
+import { StudioChrome } from "@/components/admin/studio-chrome";
 import { getCurrentUser } from "@/lib/auth";
 
 export const metadata: Metadata = {
@@ -10,10 +10,9 @@ export const metadata: Metadata = {
 export default async function StudioLayout({ children }: { children: React.ReactNode }) {
   const user = await getCurrentUser();
 
-  return (
-    <div className="flex min-h-screen bg-muted/30">
-      {user ? <AdminSidebar userEmail={user.email ?? null} /> : null}
-      <main className="flex-1 min-w-0">{children}</main>
-    </div>
-  );
+  if (!user) {
+    return <div className="min-h-screen">{children}</div>;
+  }
+
+  return <StudioChrome userEmail={user.email ?? null}>{children}</StudioChrome>;
 }

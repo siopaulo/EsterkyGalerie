@@ -18,7 +18,7 @@ export default async function NewStoryPage() {
           { label: "Nový" },
         ]}
       />
-      <section className="max-w-2xl px-6 py-8 md:px-10">
+      <section className="mx-auto max-w-full px-4 py-8 md:max-w-2xl md:px-10">
         <form action={createNewStoryAndRedirect} className="space-y-4 rounded-lg border border-border bg-background p-6">
           <div className="space-y-1.5">
             <Label htmlFor="title">Název příběhu</Label>
