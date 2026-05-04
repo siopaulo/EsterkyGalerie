@@ -153,6 +153,7 @@ export function PhotoUploader({
         alt_text: altText,
         description: description.trim() || null,
         visibility,
+        exclude_from_gallery: false,
         is_featured_home: featured,
         width: uploaded.width,
         height: uploaded.height,
