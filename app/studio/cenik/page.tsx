@@ -1,22 +1,7 @@
-import { AdminPageHeader } from "@/components/admin/page-header";
-import { PricingManager } from "@/components/admin/pricing-manager";
 import { requireAdmin } from "@/lib/auth";
-import { createSupabaseAdmin } from "@/lib/supabase/admin";
-import type { PricingItem } from "@/types/database";
+import { redirect } from "next/navigation";
 
 export default async function StudioPricingPage() {
   await requireAdmin();
-  const admin = createSupabaseAdmin();
-  const { data } = await admin.from("pricing_items").select("*").order("section").order("sort_order");
-  return (
-    <>
-      <AdminPageHeader
-        title="Ceník"
-        description="Balíčky a doplňky. Každá položka má název, cenu, popis a seznam výhod."
-      />
-      <section className="max-w-full px-4 py-8 md:px-10">
-        <PricingManager initial={(data ?? []) as PricingItem[]} />
-      </section>
-    </>
-  );
+  redirect("/studio/stranky/cenik");
 }

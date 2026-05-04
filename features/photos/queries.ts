@@ -84,6 +84,7 @@ export async function fetchGallery(q: GalleryQuery): Promise<GalleryResult> {
     .from("photos")
     .select("*", { count: "exact" })
     .eq("visibility", "public")
+    .eq("exclude_from_gallery", false)
     .is("deleted_at", null)
     .order("created_at", { ascending: false })
     .range(from, to);

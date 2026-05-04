@@ -29,6 +29,7 @@ export function PhotoEditor({ photo, initialTagSlugs, availableTags, usage }: Ph
   const [altText, setAltText] = useState(photo.alt_text);
   const [description, setDescription] = useState(photo.description ?? "");
   const [visibility, setVisibility] = useState<"public" | "hidden">(photo.visibility);
+  const [excludeFromGallery, setExcludeFromGallery] = useState(Boolean(photo.exclude_from_gallery));
   const [featured, setFeatured] = useState(photo.is_featured_home);
   const [selected, setSelected] = useState(initialTagSlugs);
   const [newTagInput, setNewTagInput] = useState("");
@@ -60,6 +61,7 @@ export function PhotoEditor({ photo, initialTagSlugs, availableTags, usage }: Ph
         alt_text: altText,
         description: description.trim() || null,
         visibility,
+        exclude_from_gallery: excludeFromGallery,
         is_featured_home: featured,
         tag_slugs: selected,
         new_tag_names: newTags,
@@ -120,9 +122,19 @@ export function PhotoEditor({ photo, initialTagSlugs, availableTags, usage }: Ph
             </SelectContent>
           </Select>
         </div>
-        <div className="flex items-end gap-3">
-          <Checkbox id="feat" checked={featured} onCheckedChange={(v) => setFeatured(v === true)} />
-          <Label htmlFor="feat" className="font-normal">Vybraná na hlavní stránku</Label>
+        <div className="flex flex-col gap-3">
+          <div className="flex items-end gap-3">
+            <Checkbox id="feat" checked={featured} onCheckedChange={(v) => setFeatured(v === true)} />
+            <Label htmlFor="feat" className="font-normal">Vybraná na hlavní stránku</Label>
+          </div>
+          <div className="flex items-end gap-3">
+            <Checkbox
+              id="exg"
+              checked={excludeFromGallery}
+              onCheckedChange={(v) => setExcludeFromGallery(v === true)}
+            />
+            <Label htmlFor="exg" className="font-normal">Nezobrazovat v galerii</Label>
+          </div>
         </div>
       </div>
 

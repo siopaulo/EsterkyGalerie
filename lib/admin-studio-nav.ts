@@ -25,7 +25,6 @@ export const ADMIN_STUDIO_NAV: AdminStudioNavItem[] = [
   { href: "/studio/pribehy", label: "Příběhy", Icon: BookOpen },
   { href: "/studio/stranky", label: "Stránky", Icon: FileText },
   { href: "/studio/tagy", label: "Tagy", Icon: Tag },
-  { href: "/studio/cenik", label: "Ceník", Icon: Wallet },
   { href: "/studio/kontakty", label: "Zprávy", Icon: Mail },
   { href: "/studio/recenze", label: "Reference", Icon: Star },
   { href: "/studio/nastaveni", label: "Nastavení", Icon: Settings },

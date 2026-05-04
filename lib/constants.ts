@@ -25,7 +25,6 @@ export const ADMIN_NAV = [
   { href: "/studio/pribehy", label: "Příběhy", icon: "BookOpen" },
   { href: "/studio/stranky", label: "Stránky", icon: "FileText" },
   { href: "/studio/tagy", label: "Tagy", icon: "Tag" },
-  { href: "/studio/cenik", label: "Ceník", icon: "Wallet" },
   { href: "/studio/kontakty", label: "Zprávy", icon: "Mail" },
   { href: "/studio/recenze", label: "Reference", icon: "Star" },
   { href: "/studio/nastaveni", label: "Nastavení", icon: "Settings" },

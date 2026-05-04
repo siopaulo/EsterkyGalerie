@@ -10,19 +10,22 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { BlockEditor, blocksWithoutClientKeys, type BlockDraft } from "@/components/admin/block-editor";
 import { updatePageMetaAction, savePageBlocksAction } from "@/features/pages/actions";
-import type { Page, PageBlock } from "@/types/database";
+import type { Page, PageBlock, PricingItem } from "@/types/database";
 import { HOME_BLOCK_TYPES, NON_HOME_BLOCK_TYPES, type BlockType } from "@/features/blocks/schemas";
 import type { PhotoLite } from "@/components/admin/photo-picker";
 import { log } from "@/lib/logger";
+import { PricingManager } from "@/components/admin/pricing-manager";
 
 interface PageEditorProps {
   page: Page;
   blocks: PageBlock[];
   availablePhotos: PhotoLite[];
+  pricingItems?: PricingItem[];
 }
 
-export function PageEditor({ page, blocks: initialBlocks, availablePhotos }: PageEditorProps) {
+export function PageEditor({ page, blocks: initialBlocks, availablePhotos, pricingItems }: PageEditorProps) {
   const isHome = page.slug === "_home";
+  const isPricingPage = page.slug === "cenik";
   const router = useRouter();
   const [title, setTitle] = useState(page.title);
   const [intro, setIntro] = useState(page.intro ?? "");
@@ -71,6 +74,18 @@ export function PageEditor({ page, blocks: initialBlocks, availablePhotos }: Pag
                 <Label htmlFor="intro">Úvodní text</Label>
                 <Textarea id="intro" rows={3} value={intro} onChange={(e) => setIntro(e.target.value)} />
               </div>
+            </div>
+          </div>
+        ) : null}
+
+        {isPricingPage ? (
+          <div className="rounded-lg border border-border bg-background p-6">
+            <h2 className="font-serif text-xl">Ceník</h2>
+            <p className="mt-1 text-sm text-muted-foreground">
+              Položky ceníku se upravují tady (jsou sdílené pro celý web) – není potřeba mít ceník zvlášť v navigaci Studia.
+            </p>
+            <div className="mt-6">
+              <PricingManager initial={(pricingItems ?? []) as PricingItem[]} />
             </div>
           </div>
         ) : null}

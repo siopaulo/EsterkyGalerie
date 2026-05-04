@@ -38,6 +38,7 @@ export interface Photo {
   alt_text: string;
   description: string | null;
   visibility: PhotoVisibility;
+  exclude_from_gallery: boolean;
   width: number | null;
   height: number | null;
   bytes: number | null;
