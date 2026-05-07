@@ -101,7 +101,7 @@ export function StoryEditor({
   }
 
   return (
-    <div className="grid gap-8 lg:grid-cols-[1fr_340px]">
+    <div className="grid gap-8 pb-24 lg:grid-cols-[1fr_340px] lg:pb-0">
       <div className="space-y-8">
         <div className="rounded-lg border border-border bg-background p-6">
           <h2 className="font-serif text-xl">Metadata</h2>
@@ -172,7 +172,7 @@ export function StoryEditor({
       </div>
 
       <aside className="space-y-6">
-        <div className="sticky top-6 rounded-lg border border-border bg-background p-6">
+        <div className="hidden rounded-lg border border-border bg-background p-6 lg:sticky lg:top-6 lg:block">
           <Button onClick={saveAll} className="w-full" variant="primary">
             <Save className="h-4 w-4" /> Uložit vše
           </Button>
@@ -268,6 +268,33 @@ export function StoryEditor({
           ) : null}
         </div>
       </aside>
+
+      {/* Mobile sticky save bar – stejné akce, jen vždy po ruce. */}
+      <div className="fixed inset-x-0 bottom-0 z-30 flex items-center gap-2 border-t border-border bg-background/95 px-4 py-3 shadow-[0_-4px_12px_-8px_rgba(0,0,0,0.25)] backdrop-blur-sm lg:hidden">
+        <ConfirmDialog
+          title="Opravdu smazat tento příběh?"
+          description="Příběh bude odstraněn včetně všech modulů. Navázané fotografie zůstanou v galerii – můžete je smazat individuálně."
+          onConfirm={onDelete}
+        >
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon"
+            className="text-red-700"
+            aria-label="Smazat příběh"
+          >
+            <Trash2 className="h-4 w-4" />
+          </Button>
+        </ConfirmDialog>
+        <Button
+          type="button"
+          onClick={saveAll}
+          variant="primary"
+          className="ml-auto flex-1 sm:flex-none"
+        >
+          <Save className="h-4 w-4" /> Uložit vše
+        </Button>
+      </div>
     </div>
   );
 }

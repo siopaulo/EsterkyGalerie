@@ -6,7 +6,7 @@ import { requireAdmin } from "@/lib/auth";
 import { createSupabaseAdmin } from "@/lib/supabase/admin";
 import { formatDateCs, safeNumber } from "@/lib/utils";
 import { Pagination } from "@/components/public/pagination";
-import { Plus } from "lucide-react";
+import { ChevronRight, Plus } from "lucide-react";
 
 type SP = Promise<{ [k: string]: string | string[] | undefined }>;
 
@@ -89,37 +89,64 @@ export default async function StudioStoriesPage({ searchParams }: { searchParams
             <p className="mt-2 text-sm text-muted-foreground">Zkuste předchozí stránku nebo upravte hledání.</p>
           </div>
         ) : (
-          <div className="w-full max-w-full overflow-x-auto rounded-lg border border-border bg-background">
-            <table className="w-full min-w-[720px] text-sm">
-              <thead className="bg-muted/40 text-left text-xs uppercase tracking-wider text-muted-foreground">
-                <tr>
-                  <th className="px-5 py-3">Název</th>
-                  <th className="px-5 py-3">Slug</th>
-                  <th className="px-5 py-3">Datum</th>
-                  <th className="px-5 py-3">Upraveno</th>
-                  <th className="px-5 py-3 text-right">Akce</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-border">
-                {stories.map((s) => (
-                  <tr key={s.id} className="hover:bg-muted/30">
-                    <td className="px-5 py-3 font-medium">{s.title}</td>
-                    <td className="px-5 py-3 text-muted-foreground">/{s.slug}</td>
-                    <td className="px-5 py-3 text-muted-foreground">{formatDateCs(s.published_at)}</td>
-                    <td className="px-5 py-3 text-muted-foreground">{formatDateCs(s.updated_at)}</td>
-                    <td className="px-5 py-3 text-right">
-                      <Link
-                        href={`/studio/pribehy/${s.id}`}
-                        className="text-foreground underline underline-offset-4 hover:text-accent"
-                      >
-                        Upravit
-                      </Link>
-                    </td>
+          <>
+            {/* Mobile: stacked cards (klikem na kartu se otevře editace). */}
+            <ul className="space-y-3 md:hidden">
+              {stories.map((s) => (
+                <li key={s.id}>
+                  <Link
+                    href={`/studio/pribehy/${s.id}`}
+                    className="flex items-center gap-3 rounded-lg border border-border bg-background p-4 transition-colors hover:border-foreground/50 hover:bg-muted/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                  >
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate font-medium">{s.title}</p>
+                      <p className="mt-0.5 truncate text-xs text-muted-foreground">/{s.slug}</p>
+                      <p className="mt-1 text-xs text-muted-foreground">
+                        Publikováno: {formatDateCs(s.published_at)}
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        Upraveno: {formatDateCs(s.updated_at)}
+                      </p>
+                    </div>
+                    <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground" aria-hidden />
+                  </Link>
+                </li>
+              ))}
+            </ul>
+
+            {/* Desktop: tabulka, klik na celý řádek otevře editaci (stretched-link). */}
+            <div className="hidden w-full max-w-full overflow-x-auto rounded-lg border border-border bg-background md:block">
+              <table className="w-full min-w-[720px] text-sm">
+                <thead className="bg-muted/40 text-left text-xs uppercase tracking-wider text-muted-foreground">
+                  <tr>
+                    <th className="px-5 py-3">Název</th>
+                    <th className="px-5 py-3">Slug</th>
+                    <th className="px-5 py-3">Datum</th>
+                    <th className="px-5 py-3">Upraveno</th>
+                    <th className="px-5 py-3 text-right">Akce</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                </thead>
+                <tbody className="divide-y divide-border">
+                  {stories.map((s) => (
+                    <tr key={s.id} className="group relative hover:bg-muted/30 focus-within:bg-muted/30">
+                      <td className="px-5 py-3 font-medium">{s.title}</td>
+                      <td className="px-5 py-3 text-muted-foreground">/{s.slug}</td>
+                      <td className="px-5 py-3 text-muted-foreground">{formatDateCs(s.published_at)}</td>
+                      <td className="px-5 py-3 text-muted-foreground">{formatDateCs(s.updated_at)}</td>
+                      <td className="px-5 py-3 text-right">
+                        <Link
+                          href={`/studio/pribehy/${s.id}`}
+                          className="text-foreground underline underline-offset-4 hover:text-accent before:absolute before:inset-0 before:content-[''] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                        >
+                          Upravit
+                        </Link>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </>
         )}
 
         {totalPages > 1 ? (

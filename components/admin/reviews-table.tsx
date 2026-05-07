@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Fragment, useState, useTransition } from "react";
+import { Fragment, useState, useTransition, type KeyboardEvent } from "react";
 import { useRouter } from "next/navigation";
 import {
   Check,
@@ -87,6 +87,19 @@ export function ReviewsTable({ rows, total, pending, approved, filters }: Review
       rating: r.rating,
       approved: r.approved,
     });
+  }
+
+  function cancelEdit() {
+    setEditingId(null);
+    setDraft({});
+  }
+
+  function onRowKeyDown(e: KeyboardEvent<HTMLElement>, r: Review) {
+    if (editingId === r.id) return;
+    if (e.key === "Enter" || e.key === " ") {
+      e.preventDefault();
+      startEdit(r);
+    }
   }
 
   async function saveEdit(id: string) {
@@ -181,24 +194,155 @@ export function ReviewsTable({ rows, total, pending, approved, filters }: Review
           </p>
         </div>
       ) : (
-        <div className="w-full max-w-full overflow-x-auto rounded-lg border border-border bg-background">
-          <table className="w-full min-w-[800px] text-sm">
-            <thead className="bg-muted/40 text-left text-xs uppercase tracking-wider text-muted-foreground">
-              <tr>
-                <th className="px-5 py-3">Stav</th>
-                <th className="px-5 py-3">Autor</th>
-                <th className="px-5 py-3">Hodnocení</th>
-                <th className="px-5 py-3">Text</th>
-                <th className="px-5 py-3">Datum</th>
-                <th className="px-5 py-3 text-right">Akce</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-border">
-              {rows.map((r) => {
-                const editing = editingId === r.id;
-                return (
-                  <Fragment key={r.id}>
-                    <tr className="align-top">
+        <>
+          {/* Mobile: stacked cards. */}
+          <ul className="space-y-3 md:hidden">
+            {rows.map((r) => {
+              const editing = editingId === r.id;
+              return (
+                <li
+                  key={r.id}
+                  className={cn(
+                    "rounded-lg border bg-background p-4 transition-colors",
+                    editing ? "border-foreground" : "border-border",
+                  )}
+                >
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="min-w-0 flex-1 space-y-1">
+                      <div className="flex flex-wrap items-center gap-2">
+                        {r.approved ? (
+                          <Badge variant="muted">Schváleno</Badge>
+                        ) : (
+                          <Badge variant="accent">Čeká</Badge>
+                        )}
+                        <span className="inline-flex items-center gap-1 text-sm font-medium">
+                          {r.rating}
+                          <Star className="h-3.5 w-3.5 fill-accent text-accent" aria-hidden />
+                        </span>
+                      </div>
+                      <p className="text-sm font-medium">
+                        {r.name?.trim() ? r.name : (
+                          <span className="text-muted-foreground">Anonym</span>
+                        )}
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        {formatDateCs(r.created_at)}
+                      </p>
+                    </div>
+                  </div>
+                  {editing ? (
+                    <div className="mt-4 space-y-3">
+                      <Input
+                        value={String(draft.name ?? "")}
+                        placeholder="Anonym"
+                        onChange={(e) => setDraft((d) => ({ ...d, name: e.target.value }))}
+                      />
+                      <StarRating
+                        value={Number(draft.rating ?? r.rating)}
+                        onChange={(v) => setDraft((d) => ({ ...d, rating: v }))}
+                        size={20}
+                      />
+                      <Textarea
+                        rows={4}
+                        value={String(draft.message ?? "")}
+                        onChange={(e) => setDraft((d) => ({ ...d, message: e.target.value }))}
+                      />
+                    </div>
+                  ) : r.message?.trim() ? (
+                    <p className="mt-3 text-sm text-muted-foreground line-clamp-4">
+                      {r.message}
+                    </p>
+                  ) : (
+                    <p className="mt-3 text-xs text-muted-foreground">— bez textu —</p>
+                  )}
+                  <div className="mt-4 flex flex-wrap gap-2">
+                    {editing ? (
+                      <>
+                        <Button size="sm" variant="primary" onClick={() => saveEdit(r.id)}>
+                          <Save className="h-4 w-4" /> Uložit
+                        </Button>
+                        <Button size="sm" variant="outline" onClick={cancelEdit}>
+                          <X className="h-4 w-4" /> Zrušit
+                        </Button>
+                      </>
+                    ) : (
+                      <>
+                        {r.approved ? (
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => onApprove(r.id, false)}
+                          >
+                            <EyeOff className="h-4 w-4" /> Skrýt
+                          </Button>
+                        ) : (
+                          <Button
+                            size="sm"
+                            variant="primary"
+                            onClick={() => onApprove(r.id, true)}
+                          >
+                            <Check className="h-4 w-4" /> Schválit
+                          </Button>
+                        )}
+                        <Button size="sm" variant="outline" onClick={() => startEdit(r)}>
+                          <Pencil className="h-4 w-4" /> Upravit
+                        </Button>
+                        <ConfirmDialog
+                          title="Opravdu smazat tuto recenzi?"
+                          description="Tuto akci nelze vrátit zpět. Recenze bude trvale odstraněna."
+                          onConfirm={() => onDelete(r.id)}
+                        >
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            className="text-red-700"
+                          >
+                            <Trash2 className="h-4 w-4" /> Smazat
+                          </Button>
+                        </ConfirmDialog>
+                      </>
+                    )}
+                  </div>
+                </li>
+              );
+            })}
+          </ul>
+
+          {/* Desktop: tabulka, klik na řádek (mimo akce) zahájí editaci. */}
+          <div className="hidden w-full max-w-full overflow-x-auto rounded-lg border border-border bg-background md:block">
+            <table className="w-full min-w-[800px] text-sm">
+              <thead className="bg-muted/40 text-left text-xs uppercase tracking-wider text-muted-foreground">
+                <tr>
+                  <th className="px-5 py-3">Stav</th>
+                  <th className="px-5 py-3">Autor</th>
+                  <th className="px-5 py-3">Hodnocení</th>
+                  <th className="px-5 py-3">Text</th>
+                  <th className="px-5 py-3">Datum</th>
+                  <th className="px-5 py-3 text-right">Akce</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-border">
+                {rows.map((r) => {
+                  const editing = editingId === r.id;
+                  return (
+                    <Fragment key={r.id}>
+                      <tr
+                        className={cn(
+                          "align-top",
+                          !editing && "cursor-pointer hover:bg-muted/30 focus-within:bg-muted/30",
+                        )}
+                        tabIndex={editing ? -1 : 0}
+                        role={editing ? undefined : "button"}
+                        aria-label={editing ? undefined : `Upravit recenzi od ${r.name?.trim() || "Anonym"}`}
+                        onClick={(e) => {
+                          if (editing) return;
+                          // Neaktivuj edit, pokud klik patří na vnořený interaktivní prvek.
+                          const t = e.target as HTMLElement;
+                          if (t.closest('button, a, input, textarea, select, [role="dialog"]')) return;
+                          startEdit(r);
+                        }}
+                        onKeyDown={(e) => onRowKeyDown(e, r)}
+                      >
                       <td className="px-5 py-3">
                         {r.approved ? (
                           <Badge variant="muted">Schváleno</Badge>
@@ -258,10 +402,7 @@ export function ReviewsTable({ rows, total, pending, approved, filters }: Review
                             <Button
                               size="sm"
                               variant="ghost"
-                              onClick={() => {
-                                setEditingId(null);
-                                setDraft({});
-                              }}
+                              onClick={cancelEdit}
                               aria-label="Zrušit úpravy"
                             >
                               <X className="h-4 w-4" aria-hidden />
@@ -273,7 +414,10 @@ export function ReviewsTable({ rows, total, pending, approved, filters }: Review
                               <Button
                                 size="sm"
                                 variant="ghost"
-                                onClick={() => onApprove(r.id, false)}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  onApprove(r.id, false);
+                                }}
                                 title="Skrýt z veřejné stránky"
                               >
                                 <EyeOff className="h-4 w-4" /> Skrýt
@@ -282,7 +426,10 @@ export function ReviewsTable({ rows, total, pending, approved, filters }: Review
                               <Button
                                 size="sm"
                                 variant="outline"
-                                onClick={() => onApprove(r.id, true)}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  onApprove(r.id, true);
+                                }}
                                 title="Zveřejnit"
                               >
                                 <Check className="h-4 w-4" /> Schválit
@@ -291,7 +438,10 @@ export function ReviewsTable({ rows, total, pending, approved, filters }: Review
                             <Button
                               size="sm"
                               variant="ghost"
-                              onClick={() => startEdit(r)}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                startEdit(r);
+                              }}
                               aria-label="Upravit recenzi"
                             >
                               <Pencil className="h-4 w-4" aria-hidden />
@@ -306,6 +456,7 @@ export function ReviewsTable({ rows, total, pending, approved, filters }: Review
                                 variant="ghost"
                                 className="text-red-700"
                                 aria-label="Smazat recenzi"
+                                onClick={(e) => e.stopPropagation()}
                               >
                                 <Trash2 className="h-4 w-4" aria-hidden />
                               </Button>
@@ -320,6 +471,7 @@ export function ReviewsTable({ rows, total, pending, approved, filters }: Review
             </tbody>
           </table>
         </div>
+        </>
       )}
     </div>
   );

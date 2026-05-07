@@ -102,7 +102,7 @@ export function SettingsEditor({ settings, availablePhotos, availableStories }: 
   }
 
   return (
-    <div className="grid max-w-full gap-8 lg:grid-cols-[1fr_320px]">
+    <div className="grid max-w-full gap-8 pb-24 lg:grid-cols-[1fr_320px] lg:pb-0">
       <div className="space-y-8">
         <Card title="Značka">
           <Field label="Název webu">
@@ -238,7 +238,7 @@ export function SettingsEditor({ settings, availablePhotos, availableStories }: 
       </div>
 
       <aside>
-        <div className="sticky top-6 rounded-lg border border-border bg-background p-6">
+        <div className="hidden rounded-lg border border-border bg-background p-6 lg:sticky lg:top-6 lg:block">
           <Button variant="primary" onClick={save} disabled={saving || !dirty} className="w-full">
             <Save className="h-4 w-4" /> {saving ? "Ukládám…" : "Uložit nastavení"}
           </Button>
@@ -248,6 +248,20 @@ export function SettingsEditor({ settings, availablePhotos, availableStories }: 
           </p>
         </div>
       </aside>
+
+      {/* Mobile sticky save bar. */}
+      <div className="fixed inset-x-0 bottom-0 z-30 flex items-center gap-2 border-t border-border bg-background/95 px-4 py-3 shadow-[0_-4px_12px_-8px_rgba(0,0,0,0.25)] backdrop-blur-sm lg:hidden">
+        <Button
+          type="button"
+          onClick={save}
+          variant="primary"
+          disabled={saving || !dirty}
+          className="w-full"
+        >
+          <Save className="h-4 w-4" />
+          {saving ? "Ukládám…" : "Uložit nastavení"}
+        </Button>
+      </div>
     </div>
   );
 }

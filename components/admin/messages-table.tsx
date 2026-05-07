@@ -138,111 +138,221 @@ export function MessagesTable({
           </p>
         </div>
       ) : (
-        <div className="w-full max-w-full overflow-x-auto rounded-lg border border-border bg-background">
-          <table className="w-full min-w-[720px] text-sm">
-            <thead className="bg-muted/40 text-left text-xs uppercase tracking-wider text-muted-foreground">
-              <tr>
-                <th className="px-5 py-3">Stav</th>
-                <th className="px-5 py-3">Od</th>
-                <th className="px-5 py-3">Předmět / začátek</th>
-                <th className="px-5 py-3">Datum</th>
-                <th className="px-5 py-3 text-right">Akce</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-border">
-              {filtered.map((m) => {
-                const expanded = open === m.id;
-                return (
-                  <Fragment key={m.id}>
-                <tr
-                  id={`contact-msg-${m.id}`}
-                  className="cursor-pointer hover:bg-muted/30"
-                  onClick={() => setOpen(expanded ? null : m.id)}
+        <>
+          {/* Mobile: stacked cards. */}
+          <ul className="space-y-3 md:hidden">
+            {filtered.map((m) => {
+              const expanded = open === m.id;
+              return (
+                <li
+                  key={m.id}
+                  id={`contact-msg-${m.id}-mobile`}
+                  className={cn(
+                    "rounded-lg border bg-background transition-colors",
+                    expanded ? "border-foreground" : "border-border",
+                  )}
                 >
-                      <td className="px-5 py-3">
+                  <button
+                    type="button"
+                    className="flex w-full items-start justify-between gap-3 rounded-t-lg p-4 text-left hover:bg-muted/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                    aria-expanded={expanded}
+                    onClick={() => setOpen(expanded ? null : m.id)}
+                  >
+                    <div className="min-w-0 flex-1 space-y-1">
+                      <div className="flex flex-wrap items-center gap-2">
                         {m.handled ? (
                           <Badge variant="muted">Vyřízeno</Badge>
                         ) : (
                           <Badge variant="accent">Nové</Badge>
                         )}
-                      </td>
-                      <td className="px-5 py-3">
-                        <div className="font-medium">{m.name}</div>
-                        <div className="text-xs text-muted-foreground">{m.email}</div>
-                      </td>
-                      <td className="px-5 py-3 text-muted-foreground">
+                        <span className="text-xs text-muted-foreground">
+                          {formatDateCs(m.created_at)}
+                        </span>
+                      </div>
+                      <p className="truncate text-sm font-medium">{m.name}</p>
+                      <p className="truncate text-xs text-muted-foreground">{m.email}</p>
+                      <p className="truncate text-xs text-muted-foreground">
                         {m.subject ? (
                           <strong className="text-foreground">{m.subject} — </strong>
                         ) : null}
                         {m.message.slice(0, 80)}
                         {m.message.length > 80 ? "…" : ""}
-                      </td>
-                      <td className="px-5 py-3 text-muted-foreground whitespace-nowrap">
-                        {formatDateCs(m.created_at)}
-                      </td>
-                      <td className="px-5 py-3 text-right">
-                        <span className="text-xs text-muted-foreground">
-                          {expanded ? "Skrýt" : "Rozbalit"}
-                        </span>
-                      </td>
-                    </tr>
-                    {expanded ? (
-                      <tr className="bg-muted/20">
-                        <td colSpan={5} className="px-5 py-5">
-                          <div className="max-w-2xl whitespace-pre-wrap text-sm leading-relaxed">
-                            {m.message}
-                          </div>
-                          {m.phone ? (
-                            <p className="mt-4 text-xs text-muted-foreground">
-                              Telefon: {m.phone}
-                            </p>
+                      </p>
+                    </div>
+                    <span className="shrink-0 text-xs text-muted-foreground">
+                      {expanded ? "Skrýt" : "Rozbalit"}
+                    </span>
+                  </button>
+                  {expanded ? (
+                    <div className="border-t border-border bg-muted/20 p-4">
+                      <div className="whitespace-pre-wrap text-sm leading-relaxed">
+                        {m.message}
+                      </div>
+                      {m.phone ? (
+                        <p className="mt-3 text-xs text-muted-foreground">
+                          Telefon: {m.phone}
+                        </p>
+                      ) : null}
+                      <div className="mt-4 flex flex-wrap gap-2">
+                        <ReplyDialog
+                          messageId={m.id}
+                          to={m.email}
+                          originalSubject={m.subject}
+                          originalMessage={m.message}
+                          onReplied={() => onReplied(m.id)}
+                        >
+                          <Button size="sm" variant="primary">
+                            <Reply className="h-4 w-4" /> Odpovědět
+                          </Button>
+                        </ReplyDialog>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => toggleHandled(m.id, m.handled)}
+                        >
+                          {m.handled ? (
+                            <>
+                              <RotateCcw className="h-4 w-4" /> Označit jako nové
+                            </>
+                          ) : (
+                            <>
+                              <CheckCircle2 className="h-4 w-4" /> Označit jako vyřízené
+                            </>
+                          )}
+                        </Button>
+                        <ConfirmDialog
+                          title="Opravdu smazat tuto zprávu?"
+                          description="Tuto akci nelze vrátit zpět. Zpráva bude trvale odstraněna."
+                          onConfirm={() => remove(m.id)}
+                        >
+                          <Button size="sm" variant="ghost" className="text-red-700">
+                            <Trash2 className="h-4 w-4" /> Smazat
+                          </Button>
+                        </ConfirmDialog>
+                      </div>
+                    </div>
+                  ) : null}
+                </li>
+              );
+            })}
+          </ul>
+
+          {/* Desktop: tabulka. */}
+          <div className="hidden w-full max-w-full overflow-x-auto rounded-lg border border-border bg-background md:block">
+            <table className="w-full min-w-[720px] text-sm">
+              <thead className="bg-muted/40 text-left text-xs uppercase tracking-wider text-muted-foreground">
+                <tr>
+                  <th className="px-5 py-3">Stav</th>
+                  <th className="px-5 py-3">Od</th>
+                  <th className="px-5 py-3">Předmět / začátek</th>
+                  <th className="px-5 py-3">Datum</th>
+                  <th className="px-5 py-3 text-right">Akce</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-border">
+                {filtered.map((m) => {
+                  const expanded = open === m.id;
+                  return (
+                    <Fragment key={m.id}>
+                  <tr
+                    id={`contact-msg-${m.id}`}
+                    className="cursor-pointer hover:bg-muted/30 focus-within:bg-muted/30"
+                    tabIndex={0}
+                    role="button"
+                    aria-expanded={expanded}
+                    onClick={() => setOpen(expanded ? null : m.id)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" || e.key === " ") {
+                        e.preventDefault();
+                        setOpen(expanded ? null : m.id);
+                      }
+                    }}
+                  >
+                        <td className="px-5 py-3">
+                          {m.handled ? (
+                            <Badge variant="muted">Vyřízeno</Badge>
+                          ) : (
+                            <Badge variant="accent">Nové</Badge>
+                          )}
+                        </td>
+                        <td className="px-5 py-3">
+                          <div className="font-medium">{m.name}</div>
+                          <div className="text-xs text-muted-foreground">{m.email}</div>
+                        </td>
+                        <td className="px-5 py-3 text-muted-foreground">
+                          {m.subject ? (
+                            <strong className="text-foreground">{m.subject} — </strong>
                           ) : null}
-                          <div className="mt-4 flex flex-wrap gap-2">
-                            <ReplyDialog
-                              messageId={m.id}
-                              to={m.email}
-                              originalSubject={m.subject}
-                              originalMessage={m.message}
-                              onReplied={() => onReplied(m.id)}
-                            >
-                              <Button size="sm" variant="primary">
-                                <Reply className="h-4 w-4" /> Odpovědět
-                              </Button>
-                            </ReplyDialog>
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              onClick={() => toggleHandled(m.id, m.handled)}
-                            >
-                              {m.handled ? (
-                                <>
-                                  <RotateCcw className="h-4 w-4" /> Označit jako nové
-                                </>
-                              ) : (
-                                <>
-                                  <CheckCircle2 className="h-4 w-4" /> Označit jako vyřízené
-                                </>
-                              )}
-                            </Button>
-                            <ConfirmDialog
-                              title="Opravdu smazat tuto zprávu?"
-                              description="Tuto akci nelze vrátit zpět. Zpráva bude trvale odstraněna."
-                              onConfirm={() => remove(m.id)}
-                            >
-                              <Button size="sm" variant="ghost" className="text-red-700">
-                                <Trash2 className="h-4 w-4" /> Smazat
-                              </Button>
-                            </ConfirmDialog>
-                          </div>
+                          {m.message.slice(0, 80)}
+                          {m.message.length > 80 ? "…" : ""}
+                        </td>
+                        <td className="px-5 py-3 text-muted-foreground whitespace-nowrap">
+                          {formatDateCs(m.created_at)}
+                        </td>
+                        <td className="px-5 py-3 text-right">
+                          <span className="text-xs text-muted-foreground">
+                            {expanded ? "Skrýt" : "Rozbalit"}
+                          </span>
                         </td>
                       </tr>
-                    ) : null}
-                  </Fragment>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
+                      {expanded ? (
+                        <tr className="bg-muted/20">
+                          <td colSpan={5} className="px-5 py-5">
+                            <div className="max-w-2xl whitespace-pre-wrap text-sm leading-relaxed">
+                              {m.message}
+                            </div>
+                            {m.phone ? (
+                              <p className="mt-4 text-xs text-muted-foreground">
+                                Telefon: {m.phone}
+                              </p>
+                            ) : null}
+                            <div className="mt-4 flex flex-wrap gap-2">
+                              <ReplyDialog
+                                messageId={m.id}
+                                to={m.email}
+                                originalSubject={m.subject}
+                                originalMessage={m.message}
+                                onReplied={() => onReplied(m.id)}
+                              >
+                                <Button size="sm" variant="primary">
+                                  <Reply className="h-4 w-4" /> Odpovědět
+                                </Button>
+                              </ReplyDialog>
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => toggleHandled(m.id, m.handled)}
+                              >
+                                {m.handled ? (
+                                  <>
+                                    <RotateCcw className="h-4 w-4" /> Označit jako nové
+                                  </>
+                                ) : (
+                                  <>
+                                    <CheckCircle2 className="h-4 w-4" /> Označit jako vyřízené
+                                  </>
+                                )}
+                              </Button>
+                              <ConfirmDialog
+                                title="Opravdu smazat tuto zprávu?"
+                                description="Tuto akci nelze vrátit zpět. Zpráva bude trvale odstraněna."
+                                onConfirm={() => remove(m.id)}
+                              >
+                                <Button size="sm" variant="ghost" className="text-red-700">
+                                  <Trash2 className="h-4 w-4" /> Smazat
+                                </Button>
+                              </ConfirmDialog>
+                            </div>
+                          </td>
+                        </tr>
+                      ) : null}
+                    </Fragment>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        </>
       )}
     </div>
   );

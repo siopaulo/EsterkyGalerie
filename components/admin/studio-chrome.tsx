@@ -4,12 +4,11 @@ import type { ReactNode } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
-import { LogOut, Menu } from "lucide-react";
+import { ExternalLink, LogOut, Menu, X } from "lucide-react";
 import { AdminSidebar } from "@/components/admin/sidebar";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { ADMIN_STUDIO_NAV } from "@/lib/admin-studio-nav";
 import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
 
 export function StudioChrome({
   userEmail,
@@ -30,31 +29,37 @@ export function StudioChrome({
     <div className="flex min-h-screen bg-muted/30">
       <AdminSidebar userEmail={userEmail} />
       <div className="flex min-w-0 flex-1 flex-col">
-        <header className="sticky top-0 z-30 flex h-14 shrink-0 items-center justify-between border-b border-border bg-background px-4 md:hidden">
+        <header className="sticky top-0 z-30 flex h-14 shrink-0 items-center justify-between gap-2 border-b border-border bg-background px-4 md:hidden">
           <Link href="/studio" className="font-serif text-lg text-foreground">
             Studio
           </Link>
-          <Button
+          <button
             type="button"
-            variant="outline"
-            size="icon"
-            className="shrink-0"
+            className="-mr-2 inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-md text-foreground transition-colors hover:bg-muted"
             aria-label={mobileOpen ? "Zavřít menu" : "Otevřít menu"}
             aria-expanded={mobileOpen}
-            onClick={() => setMobileOpen(true)}
+            onClick={() => setMobileOpen((v) => !v)}
           >
-            <Menu className="h-5 w-5" />
-          </Button>
+            {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+          </button>
         </header>
 
         <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
-          <SheetContent side="right" className="flex max-w-[min(100vw,20rem)] flex-col gap-0 p-0">
+          <SheetContent
+            side="right"
+            className="flex max-w-[min(100vw,20rem)] flex-col gap-0 p-0"
+          >
             <div className="border-b border-border px-4 py-4 pr-12">
-              <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Studio</p>
+              <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                Studio
+              </p>
               <p className="mt-1 font-serif text-xl">Navigace</p>
             </div>
-            <nav className="flex-1 overflow-y-auto p-3" aria-label="Studio navigace">
-              <ul className="space-y-0.5">
+            <nav
+              className="flex-1 overflow-y-auto p-3"
+              aria-label="Studio navigace"
+            >
+              <ul className="flex flex-col gap-1">
                 {ADMIN_STUDIO_NAV.map((item) => {
                   const active = item.exact
                     ? pathname === item.href
@@ -80,8 +85,21 @@ export function StudioChrome({
               </ul>
             </nav>
             <div className="mt-auto border-t border-border p-4">
+              <Link
+                href="/"
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={() => setMobileOpen(false)}
+                className="mb-2 flex w-full items-center justify-center gap-2 rounded-md border border-border bg-background px-3 py-3 text-sm font-medium hover:bg-muted"
+              >
+                <ExternalLink className="h-4 w-4" />
+                Náhled webu
+              </Link>
               {userEmail ? (
-                <p className="mb-3 break-all text-xs text-muted-foreground" title={userEmail}>
+                <p
+                  className="my-3 break-all text-center text-xs text-muted-foreground"
+                  title={userEmail}
+                >
                   {userEmail}
                 </p>
               ) : null}

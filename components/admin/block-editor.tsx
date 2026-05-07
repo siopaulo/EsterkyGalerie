@@ -165,10 +165,10 @@ export function BlockEditor({ value, onChange, photos, allowedTypes }: BlockEdit
           return (
             <div
               key={blockRowKey(b, i)}
-              className={`rounded-lg border bg-background p-5 shadow-sm ${invalid ? "border-red-400" : "border-border"}`}
+              className={`rounded-lg border bg-background p-4 shadow-sm sm:p-5 ${invalid ? "border-red-400" : "border-border"}`}
             >
-              <div className="mb-4 flex items-center justify-between gap-3">
-                <div className="flex items-center gap-2">
+              <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
+                <div className="flex flex-wrap items-center gap-2">
                   <span className="rounded-md bg-muted px-2 py-1 text-xs font-medium uppercase tracking-wider text-muted-foreground">
                     {BLOCK_LABELS[b.block_type] ?? b.block_type}
                   </span>
@@ -179,12 +179,12 @@ export function BlockEditor({ value, onChange, photos, allowedTypes }: BlockEdit
                     </span>
                   ) : null}
                 </div>
-                <div className="flex items-center gap-1">
+                <div className="flex shrink-0 items-center gap-1">
                   <button
                     type="button"
                     onClick={() => move(i, -1)}
                     disabled={i === 0}
-                    className="rounded p-1.5 transition-colors hover:bg-muted disabled:cursor-not-allowed disabled:opacity-30"
+                    className="inline-flex h-9 w-9 items-center justify-center rounded transition-colors hover:bg-muted disabled:cursor-not-allowed disabled:opacity-30"
                     aria-label="Přesunout nahoru"
                   >
                     <ChevronUp className="h-4 w-4" />
@@ -193,7 +193,7 @@ export function BlockEditor({ value, onChange, photos, allowedTypes }: BlockEdit
                     type="button"
                     onClick={() => move(i, 1)}
                     disabled={i === value.length - 1}
-                    className="rounded p-1.5 transition-colors hover:bg-muted disabled:cursor-not-allowed disabled:opacity-30"
+                    className="inline-flex h-9 w-9 items-center justify-center rounded transition-colors hover:bg-muted disabled:cursor-not-allowed disabled:opacity-30"
                     aria-label="Přesunout dolů"
                   >
                     <ChevronDown className="h-4 w-4" />
@@ -205,7 +205,7 @@ export function BlockEditor({ value, onChange, photos, allowedTypes }: BlockEdit
                   >
                     <button
                       type="button"
-                      className="rounded p-1.5 text-red-700 transition-colors hover:bg-red-50"
+                      className="inline-flex h-9 w-9 items-center justify-center rounded text-red-700 transition-colors hover:bg-red-50"
                       aria-label="Smazat blok"
                     >
                       <Trash2 className="h-4 w-4" />
@@ -227,9 +227,9 @@ export function BlockEditor({ value, onChange, photos, allowedTypes }: BlockEdit
 function AddBlock({ onAdd, types }: { onAdd: (t: BlockType) => void; types: BlockType[] }) {
   const [type, setType] = useState<BlockType>(types[0] ?? "rich_text");
   return (
-    <div className="flex items-center gap-3 rounded-lg border border-dashed border-border bg-muted/30 p-4">
+    <div className="flex flex-col gap-3 rounded-lg border border-dashed border-border bg-muted/30 p-4 sm:flex-row sm:items-center">
       <Select value={type} onValueChange={(v) => setType(v as BlockType)}>
-        <SelectTrigger className="max-w-xs">
+        <SelectTrigger className="w-full sm:max-w-xs">
           <SelectValue />
         </SelectTrigger>
         <SelectContent>
@@ -240,7 +240,12 @@ function AddBlock({ onAdd, types }: { onAdd: (t: BlockType) => void; types: Bloc
           ))}
         </SelectContent>
       </Select>
-      <Button type="button" variant="primary" onClick={() => onAdd(type)}>
+      <Button
+        type="button"
+        variant="primary"
+        onClick={() => onAdd(type)}
+        className="w-full sm:w-auto"
+      >
         <Plus className="h-4 w-4" /> Přidat modul
       </Button>
     </div>

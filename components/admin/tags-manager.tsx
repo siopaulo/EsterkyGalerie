@@ -51,7 +51,7 @@ export function TagsManager({ initialTags }: { initialTags: Tag[] }) {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center gap-2">
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
         <Input
           placeholder="Nový tag…"
           value={newName}
@@ -62,8 +62,9 @@ export function TagsManager({ initialTags }: { initialTags: Tag[] }) {
               add();
             }
           }}
+          className="min-w-0 flex-1"
         />
-        <Button variant="primary" onClick={add}>
+        <Button variant="primary" onClick={add} className="sm:w-auto">
           <Plus className="h-4 w-4" /> Přidat
         </Button>
       </div>
@@ -93,10 +94,16 @@ function TagRow({
   const [name, setName] = useState(tag.name);
   const dirty = name !== tag.name;
   return (
-    <li className="flex items-center gap-3 px-4 py-3">
-      <Input value={name} onChange={(e) => setName(e.target.value)} className="max-w-sm" />
-      <span className="text-xs text-muted-foreground">/{tag.slug}</span>
-      <div className="ml-auto flex items-center gap-2">
+    <li className="flex flex-col gap-3 px-4 py-3 sm:flex-row sm:items-center">
+      <div className="flex min-w-0 flex-1 flex-col gap-1 sm:flex-row sm:items-center sm:gap-3">
+        <Input
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          className="min-w-0 sm:max-w-sm"
+        />
+        <span className="text-xs text-muted-foreground sm:whitespace-nowrap">/{tag.slug}</span>
+      </div>
+      <div className="flex items-center justify-end gap-2">
         {dirty ? (
           <Button variant="outline" size="sm" onClick={() => onSave(tag.id, name)}>
             <Save className="h-4 w-4" /> Uložit

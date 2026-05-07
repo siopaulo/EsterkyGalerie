@@ -60,7 +60,7 @@ export function PageEditor({ page, blocks: initialBlocks, availablePhotos, prici
   }
 
   return (
-    <div className="grid gap-8 lg:grid-cols-[1fr_340px]">
+    <div className="grid gap-8 pb-24 lg:grid-cols-[1fr_340px] lg:pb-0">
       <div className="space-y-8">
         {!isHome ? (
           <div className="rounded-lg border border-border bg-background p-6">
@@ -128,7 +128,7 @@ export function PageEditor({ page, blocks: initialBlocks, availablePhotos, prici
       </div>
 
       <aside>
-        <div className="sticky top-6 rounded-lg border border-border bg-background p-6">
+        <div className="hidden rounded-lg border border-border bg-background p-6 lg:sticky lg:top-6 lg:block">
           <Button onClick={save} className="w-full" variant="primary">
             <Save className="h-4 w-4" /> {isHome ? "Uložit homepage" : "Uložit stránku"}
           </Button>
@@ -139,6 +139,19 @@ export function PageEditor({ page, blocks: initialBlocks, availablePhotos, prici
           </p>
         </div>
       </aside>
+
+      {/* Mobile sticky save bar. */}
+      <div className="fixed inset-x-0 bottom-0 z-30 flex items-center gap-2 border-t border-border bg-background/95 px-4 py-3 shadow-[0_-4px_12px_-8px_rgba(0,0,0,0.25)] backdrop-blur-sm lg:hidden">
+        <Button
+          type="button"
+          onClick={save}
+          variant="primary"
+          className="w-full"
+        >
+          <Save className="h-4 w-4" />
+          {isHome ? "Uložit homepage" : "Uložit stránku"}
+        </Button>
+      </div>
     </div>
   );
 }
