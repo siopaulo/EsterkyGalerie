@@ -6,7 +6,6 @@ import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { ExternalLink, LogOut, Menu, X } from "lucide-react";
 import { AdminSidebar } from "@/components/admin/sidebar";
-import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { ADMIN_STUDIO_NAV } from "@/lib/admin-studio-nav";
 import { cn } from "@/lib/utils";
 
@@ -21,7 +20,7 @@ export function StudioChrome({
   const [mobileOpen, setMobileOpen] = useState(false);
 
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- zavřít drawer při navigaci (stejný vzor jako veřejný header)
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- zavřít panel při navigaci (stejný vzor jako veřejný header)
     setMobileOpen(false);
   }, [pathname]);
 
@@ -29,35 +28,26 @@ export function StudioChrome({
     <div className="flex min-h-screen bg-muted/30">
       <AdminSidebar userEmail={userEmail} />
       <div className="flex min-w-0 flex-1 flex-col">
-        <header className="sticky top-0 z-30 flex h-14 shrink-0 items-center justify-between gap-2 border-b border-border bg-background px-4 md:hidden">
-          <Link href="/studio" className="font-serif text-lg text-foreground">
-            Studio
-          </Link>
-          <button
-            type="button"
-            className="-mr-2 inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-md text-foreground transition-colors hover:bg-muted"
-            aria-label={mobileOpen ? "Zavřít menu" : "Otevřít menu"}
-            aria-expanded={mobileOpen}
-            onClick={() => setMobileOpen((v) => !v)}
-          >
-            {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-          </button>
-        </header>
+        <header className="sticky top-0 z-30 border-b border-border bg-background md:hidden">
+          <div className="flex h-14 items-center justify-between gap-2 px-4">
+            <Link href="/studio" className="font-serif text-lg text-foreground">
+              Studio
+            </Link>
+            <button
+              type="button"
+              className="-mr-2 inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-md text-foreground transition-colors hover:bg-muted"
+              aria-label={mobileOpen ? "Zavřít menu" : "Otevřít menu"}
+              aria-expanded={mobileOpen}
+              onClick={() => setMobileOpen((v) => !v)}
+            >
+              {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+            </button>
+          </div>
 
-        <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
-          <SheetContent
-            side="right"
-            className="flex max-w-[min(100vw,20rem)] flex-col gap-0 p-0"
-          >
-            <div className="border-b border-border px-4 py-4 pr-12">
-              <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
-                Studio
-              </p>
-              <p className="mt-1 font-serif text-xl">Navigace</p>
-            </div>
+          {mobileOpen ? (
             <nav
-              className="flex-1 overflow-y-auto p-3"
               aria-label="Studio navigace"
+              className="border-t border-border px-4 py-4"
             >
               <ul className="flex flex-col gap-1">
                 {ADMIN_STUDIO_NAV.map((item) => {
@@ -69,7 +59,7 @@ export function StudioChrome({
                       <Link
                         href={item.href}
                         className={cn(
-                          "flex items-center gap-3 rounded-md px-3 py-3 text-base transition-colors",
+                          "flex items-center gap-3 rounded-md px-3 py-2 text-base transition-colors",
                           active
                             ? "bg-muted font-medium text-foreground"
                             : "text-foreground/80 hover:bg-muted hover:text-foreground",
@@ -83,38 +73,39 @@ export function StudioChrome({
                   );
                 })}
               </ul>
+
+              <div className="mt-3 border-t border-border pt-3">
+                <Link
+                  href="/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={() => setMobileOpen(false)}
+                  className="flex items-center gap-3 rounded-md px-3 py-2 text-base text-foreground/80 transition-colors hover:bg-muted hover:text-foreground"
+                >
+                  <ExternalLink className="h-5 w-5 shrink-0" />
+                  Náhled webu
+                </Link>
+                <form action="/studio/logout" method="post">
+                  <button
+                    type="submit"
+                    className="flex w-full items-center gap-3 rounded-md px-3 py-2 text-left text-base text-foreground/80 transition-colors hover:bg-muted hover:text-foreground"
+                  >
+                    <LogOut className="h-5 w-5 shrink-0" />
+                    Odhlásit
+                  </button>
+                </form>
+                {userEmail ? (
+                  <p
+                    className="mt-2 break-all px-3 text-xs text-muted-foreground"
+                    title={userEmail}
+                  >
+                    {userEmail}
+                  </p>
+                ) : null}
+              </div>
             </nav>
-            <div className="mt-auto border-t border-border p-4">
-              <Link
-                href="/"
-                target="_blank"
-                rel="noopener noreferrer"
-                onClick={() => setMobileOpen(false)}
-                className="mb-2 flex w-full items-center justify-center gap-2 rounded-md border border-border bg-background px-3 py-3 text-sm font-medium hover:bg-muted"
-              >
-                <ExternalLink className="h-4 w-4" />
-                Náhled webu
-              </Link>
-              {userEmail ? (
-                <p
-                  className="my-3 break-all text-center text-xs text-muted-foreground"
-                  title={userEmail}
-                >
-                  {userEmail}
-                </p>
-              ) : null}
-              <form action="/studio/logout" method="post">
-                <button
-                  type="submit"
-                  className="flex w-full items-center justify-center gap-2 rounded-md border border-border bg-background px-3 py-3 text-sm font-medium hover:bg-muted"
-                >
-                  <LogOut className="h-4 w-4" />
-                  Odhlásit
-                </button>
-              </form>
-            </div>
-          </SheetContent>
-        </Sheet>
+          ) : null}
+        </header>
 
         <main className="min-w-0 flex-1">{children}</main>
       </div>
