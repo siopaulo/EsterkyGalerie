@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { Check } from "lucide-react";
 import { fetchPageBySlug } from "@/features/pages/queries";
-import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { createSupabasePublicReadClient } from "@/lib/supabase/public";
 import { Button } from "@/components/ui/button";
 import { metadataForCmsPage } from "@/lib/seo";
 import { getSiteSettings } from "@/features/site-settings/queries";
@@ -21,15 +21,15 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function CenikPage() {
-  const [page, supabase] = await Promise.all([
+  const supabase = createSupabasePublicReadClient();
+  const [page, { data: itemsData }] = await Promise.all([
     fetchPageBySlug("cenik"),
-    createSupabaseServerClient(),
+    supabase
+      .from("pricing_items")
+      .select("*")
+      .order("section", { ascending: true })
+      .order("sort_order", { ascending: true }),
   ]);
-  const { data: itemsData } = await supabase
-    .from("pricing_items")
-    .select("*")
-    .order("section", { ascending: true })
-    .order("sort_order", { ascending: true });
 
   const items = (itemsData ?? []) as PricingItem[];
   const sections = groupBy(items, (i) => i.section);

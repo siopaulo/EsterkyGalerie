@@ -8,9 +8,17 @@ export async function middleware(request: NextRequest) {
 export const config = {
   matcher: [
     /*
-     * Vynech statické assety a API, které nepotřebují session refresh.
-     * Studio route handlery cookie nastaví samy.
+     * Pouze /studio a /api/studio* potřebují session refresh + admin guard.
+     * Ostatní cesty (homepage, /o-mne, /sluzby, /galerie, /pribehy/*, …)
+     * jsou veřejné a nepoužívají cookies, takže middleware tam jen
+     * zbytečně přidává Supabase round-trip a brání plnému static / ISR
+     * rendrování. Toto omezení matcheru je důležité pro LCP a TTFB,
+     * protože odstraní 100–500 ms latence z každé public stránky.
+     *
+     * Login route /studio/login zůstává pokrytý kvůli redirectu na /studio,
+     * pokud už je uživatel přihlášený.
      */
-    "/((?!_next/static|_next/image|favicon.ico|robots.txt|sitemap.xml|.*\\.(?:png|jpg|jpeg|gif|webp|avif|svg|ico|woff|woff2)).*)",
+    "/studio",
+    "/studio/:path*",
   ],
 };

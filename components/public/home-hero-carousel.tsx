@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState, type TouchEvent } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { CloudinaryImage } from "@/components/shared/cloudinary-image";
+import { HERO_WIDTHS, HERO_SIZES_DEFAULT, GALLERY_WIDTHS } from "@/lib/cloudinary-url";
 import { cn } from "@/lib/utils";
 import type { Photo } from "@/types/database";
 
@@ -91,7 +92,13 @@ export function HomeHeroCarousel({ photos, autoPlayMs = 5000 }: HomeHeroCarousel
               aspectClass=""
               className="h-full w-full"
               variant={{ crop: "fill", gravity: "auto" }}
-              sizes="(min-width:1024px) 40vw, (min-width:768px) 50vw, 100vw"
+              // Hero zabírá ~50vw na desktopu, ne 40 – přesnější sizes ⇒
+              // browser stáhne menší soubor pro běžné monitory a zároveň
+              // dostatečnou variantu pro retina.
+              sizes={HERO_SIZES_DEFAULT}
+              // Pro první slide použij širší srcset (až 2000w pro retina),
+              // ostatní můžou stačit s běžnými gallery šířkami.
+              widths={i === 0 ? HERO_WIDTHS : GALLERY_WIDTHS}
               priority={i === 0}
             />
           </div>

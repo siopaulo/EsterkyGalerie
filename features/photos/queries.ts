@@ -1,10 +1,10 @@
 import "server-only";
-import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { createSupabasePublicReadClient } from "@/lib/supabase/public";
 import type { Photo, PhotoWithTags, Tag } from "@/types/database";
 
 export async function fetchPhotosByIds(ids: string[]): Promise<Photo[]> {
   if (!ids.length) return [];
-  const supabase = await createSupabaseServerClient();
+  const supabase = createSupabasePublicReadClient();
   const { data } = await supabase
     .from("photos")
     .select("*")
@@ -23,7 +23,7 @@ export async function fetchPhotosByIdsKeepOrder(ids: string[]): Promise<(Photo |
 
 export async function fetchPhotoById(id: string): Promise<Photo | null> {
   if (!id) return null;
-  const supabase = await createSupabaseServerClient();
+  const supabase = createSupabasePublicReadClient();
   const { data } = await supabase
     .from("photos")
     .select("*")
@@ -55,7 +55,7 @@ export async function fetchGallery(q: GalleryQuery): Promise<GalleryResult> {
   const from = (page - 1) * perPage;
   const to = from + perPage - 1;
 
-  const supabase = await createSupabaseServerClient();
+  const supabase = createSupabasePublicReadClient();
 
   // Když filtrujeme tagy, bereme SJEDNOCENÍ – fotka se ukáže, pokud má alespoň jeden ze zvolených tagů.
   let tagFilteredIds: string[] | null = null;
@@ -112,7 +112,7 @@ export async function fetchGallery(q: GalleryQuery): Promise<GalleryResult> {
 
 async function fetchTagsForPhotoIds(photoIds: string[]): Promise<Map<string, Tag[]>> {
   if (!photoIds.length) return new Map();
-  const supabase = await createSupabaseServerClient();
+  const supabase = createSupabasePublicReadClient();
   const { data } = await supabase
     .from("photo_tags")
     .select("photo_id, tags(*)")
@@ -130,7 +130,7 @@ async function fetchTagsForPhotoIds(photoIds: string[]): Promise<Map<string, Tag
 }
 
 export async function fetchAllTags(): Promise<Tag[]> {
-  const supabase = await createSupabaseServerClient();
+  const supabase = createSupabasePublicReadClient();
   const { data } = await supabase.from("tags").select("*").order("name", { ascending: true });
   return (data ?? []) as Tag[];
 }

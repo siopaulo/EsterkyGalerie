@@ -1,6 +1,6 @@
 import "server-only";
 import { cache } from "react";
-import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { createSupabasePublicReadClient } from "@/lib/supabase/public";
 import type { SiteSettings } from "@/types/database";
 import { SITE_DEFAULTS } from "@/lib/constants";
 
@@ -25,7 +25,7 @@ const FALLBACK: SiteSettings = {
 
 export const getSiteSettings = cache(async (): Promise<SiteSettings> => {
   try {
-    const supabase = await createSupabaseServerClient();
+    const supabase = createSupabasePublicReadClient();
     const { data, error } = await supabase
       .from("site_settings")
       .select("*")

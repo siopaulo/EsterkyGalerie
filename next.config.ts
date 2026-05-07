@@ -1,7 +1,36 @@
 import type { NextConfig } from "next";
+import { createRequire } from "node:module";
 import { withSentryConfig } from "@sentry/nextjs";
 
 const isProd = process.env.NODE_ENV === "production";
+
+/**
+ * Volitelný bundle analyzer – aktivuje se přes `ANALYZE=true pnpm build`
+ * (alias `pnpm analyze`). Když není package nainstalovaný, build prostě
+ * pokračuje bez analyzeru. Drží to konfiguraci robustní pro CI / Netlify,
+ * kde balík nainstalován mít nemusíme.
+ */
+type NextWrapper = (cfg: NextConfig) => NextConfig;
+
+function loadBundleAnalyzer(): NextWrapper {
+  if (process.env.ANALYZE !== "true") return (c) => c;
+  try {
+    const localRequire = createRequire(import.meta.url);
+    type AnalyzerOpts = { enabled?: boolean; openAnalyzer?: boolean };
+    const factory = localRequire("@next/bundle-analyzer") as
+      | ((opts?: AnalyzerOpts) => NextWrapper)
+      | { default: (opts?: AnalyzerOpts) => NextWrapper };
+    const create = typeof factory === "function" ? factory : factory.default;
+    return create({ enabled: true, openAnalyzer: false });
+  } catch {
+    console.warn(
+      "[next.config] ANALYZE=true ale @next/bundle-analyzer není instalovaný. Spusť `pnpm install`.",
+    );
+    return (c) => c;
+  }
+}
+
+const withBundleAnalyzer = loadBundleAnalyzer();
 
 /**
  * CSP v produkci – vyvážení bezpečnosti a Next.js (inline styly / skripty).
@@ -68,7 +97,7 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default withSentryConfig(nextConfig, {
+export default withSentryConfig(withBundleAnalyzer(nextConfig), {
   org: process.env.SENTRY_ORG,
   project: process.env.SENTRY_PROJECT,
   authToken: process.env.SENTRY_AUTH_TOKEN,

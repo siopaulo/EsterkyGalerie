@@ -1,5 +1,5 @@
 import "server-only";
-import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { createSupabasePublicReadClient } from "@/lib/supabase/public";
 import type { Photo, Story, StoryBlock, StoryWithMeta, Tag } from "@/types/database";
 
 export interface StoriesQuery {
@@ -23,7 +23,7 @@ export async function fetchStories(q: StoriesQuery): Promise<StoriesResult> {
   const from = (page - 1) * perPage;
   const to = from + perPage - 1;
 
-  const supabase = await createSupabaseServerClient();
+  const supabase = createSupabasePublicReadClient();
 
   // SJEDNOCENÍ – příběh se ukáže, pokud má alespoň jeden ze zvolených tagů.
   let tagFilteredIds: string[] | null = null;
@@ -80,7 +80,7 @@ export async function fetchStoryBySlug(slug: string): Promise<{
   tags: Tag[];
   cover: Photo | null;
 } | null> {
-  const supabase = await createSupabaseServerClient();
+  const supabase = createSupabasePublicReadClient();
   const { data: story } = await supabase
     .from("stories")
     .select("*")
@@ -112,7 +112,7 @@ export async function fetchStoryBySlug(slug: string): Promise<{
 }
 
 export async function fetchRelatedStories(storyId: string, tagIds: string[], limit = 3): Promise<StoryWithMeta[]> {
-  const supabase = await createSupabaseServerClient();
+  const supabase = createSupabasePublicReadClient();
   if (!tagIds.length) {
     const { data } = await supabase
       .from("stories")
@@ -156,7 +156,7 @@ export async function fetchRelatedStories(storyId: string, tagIds: string[], lim
 
 async function fetchStoryTags(storyIds: string[]): Promise<Map<string, Tag[]>> {
   if (!storyIds.length) return new Map();
-  const supabase = await createSupabaseServerClient();
+  const supabase = createSupabasePublicReadClient();
   const { data } = await supabase
     .from("story_tags")
     .select("story_id, tags(*)")
@@ -174,7 +174,7 @@ async function fetchStoryTags(storyIds: string[]): Promise<Map<string, Tag[]>> {
 
 async function fetchPhotosMap(ids: string[]): Promise<Map<string, Photo>> {
   if (!ids.length) return new Map();
-  const supabase = await createSupabaseServerClient();
+  const supabase = createSupabasePublicReadClient();
   const { data } = await supabase
     .from("photos")
     .select("*")

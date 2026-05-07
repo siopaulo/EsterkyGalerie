@@ -1,12 +1,12 @@
 import "server-only";
-import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { createSupabasePublicReadClient } from "@/lib/supabase/public";
 import type { Page, PageBlock } from "@/types/database";
 
 export async function fetchPageBySlug(slug: string): Promise<{
   page: Page;
   blocks: PageBlock[];
 } | null> {
-  const supabase = await createSupabaseServerClient();
+  const supabase = createSupabasePublicReadClient();
   const { data: page } = await supabase
     .from("pages")
     .select("*")

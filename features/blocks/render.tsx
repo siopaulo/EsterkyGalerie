@@ -9,6 +9,7 @@ import { sanitizeHtml } from "@/features/blocks/sanitize";
 import { log } from "@/lib/logger";
 import { HomeHeroCarousel } from "@/components/public/home-hero-carousel";
 import { GalleryShowcase } from "@/components/public/gallery-showcase";
+import { HERO_WIDTHS } from "@/lib/cloudinary-url";
 import {
   type BlockType,
   type HeroPayload,
@@ -160,6 +161,7 @@ function HeroBlock({ data, photos }: { data: HeroPayload; photos: Map<string, Ph
             alt={bg.alt_text || data.title}
             aspectClass="absolute inset-0"
             priority
+            widths={HERO_WIDTHS}
             sizes="100vw"
             variant={{ crop: "fill", gravity: "auto" }}
             className="absolute inset-0 h-full w-full"
@@ -515,8 +517,9 @@ function StoryIntroBlock({ data, photos }: { data: StoryIntroPayload; photos: Ma
             alt={cover.alt_text || data.title}
             aspectClass="aspect-[16/9]"
             variant={{ crop: "fill", gravity: "auto" }}
+            widths={HERO_WIDTHS}
             priority
-            sizes="100vw"
+            sizes="(min-width: 1280px) 1280px, 100vw"
           />
         </div>
       ) : null}

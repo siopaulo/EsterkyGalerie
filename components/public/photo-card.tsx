@@ -1,4 +1,5 @@
 import { CloudinaryImage } from "@/components/shared/cloudinary-image";
+import { CARD_WIDTHS } from "@/lib/cloudinary-url";
 import type { PhotoWithTags } from "@/types/database";
 import { cn } from "@/lib/utils";
 
@@ -6,10 +7,23 @@ interface PhotoCardProps {
   photo: PhotoWithTags;
   className?: string;
   priority?: boolean;
+  /**
+   * Optional override pro `sizes`, pokud karta sedí v jiném gridu, než je
+   * defaultní galerie 2/3/4 sloupce.
+   */
+  sizes?: string;
   onClick?: () => void;
 }
 
-export function PhotoCard({ photo, className, priority, onClick }: PhotoCardProps) {
+// Galerie grid:
+//   - mobil:    grid-cols-2          → ~50vw
+//   - sm (640): grid-cols-3          → ~33vw
+//   - lg (1024):grid-cols-4          → ~25vw
+// Aktivně držíme malé varianty – karta nikdy nepotřebuje 1080+ wide.
+const DEFAULT_CARD_SIZES =
+  "(min-width: 1024px) 25vw, (min-width: 640px) 33vw, 50vw";
+
+export function PhotoCard({ photo, className, priority, sizes, onClick }: PhotoCardProps) {
   const Tag = onClick ? "button" : "div";
   return (
     <Tag
@@ -27,6 +41,8 @@ export function PhotoCard({ photo, className, priority, onClick }: PhotoCardProp
         alt={photo.alt_text || photo.display_name}
         aspectClass="aspect-[4/5]"
         priority={priority}
+        widths={CARD_WIDTHS}
+        sizes={sizes ?? DEFAULT_CARD_SIZES}
         variant={{ crop: "fill", gravity: "auto" }}
         className="transition-transform duration-700 group-hover:scale-[1.02]"
       />

@@ -1,5 +1,5 @@
 import type { MetadataRoute } from "next";
-import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { createSupabasePublicReadClient } from "@/lib/supabase/public";
 import { publicEnv } from "@/lib/env";
 import { log } from "@/lib/logger";
 
@@ -27,7 +27,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   }));
 
   try {
-    const supabase = await createSupabaseServerClient();
+    const supabase = createSupabasePublicReadClient();
     const { data } = await supabase
       .from("stories")
       .select("slug, updated_at, published_at")

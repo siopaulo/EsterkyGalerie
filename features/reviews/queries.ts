@@ -1,5 +1,5 @@
 import "server-only";
-import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { createSupabasePublicReadClient } from "@/lib/supabase/public";
 import type { Review } from "@/types/database";
 
 export interface ReviewsPage {
@@ -33,7 +33,7 @@ export async function listApprovedReviews(opts: {
   const to = from + pageSize - 1;
   const sort: PublicReviewsSort = opts.sort ?? "newest";
 
-  const supabase = await createSupabaseServerClient();
+  const supabase = createSupabasePublicReadClient();
   let query = supabase
     .from("reviews")
     .select("*", { count: "exact" })
@@ -77,7 +77,7 @@ export async function listApprovedReviews(opts: {
  * lze později nahradit materializovaným viewem nebo RPC.
  */
 export async function getReviewsSummary(): Promise<ReviewsSummary> {
-  const supabase = await createSupabaseServerClient();
+  const supabase = createSupabasePublicReadClient();
   const { data } = await supabase
     .from("reviews")
     .select("rating")

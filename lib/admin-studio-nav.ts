@@ -5,7 +5,6 @@ import {
   BookOpen,
   FileText,
   Tag,
-  Wallet,
   Mail,
   Star,
   Settings,

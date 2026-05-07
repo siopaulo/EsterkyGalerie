@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Save, X } from "lucide-react";
 import { toast } from "sonner";
@@ -45,22 +45,22 @@ function settingsFingerprint(s: SiteSettings): string {
  */
 export function SettingsEditor({ settings, availablePhotos, availableStories }: Props) {
   const router = useRouter();
-  const [values, setValues] = useState<SiteSettings>(settings);
+  // Držíme draft jen v okamžiku, kdy uživatel začne editovat.
+  // Tím se vyhneme anti-patternu `setState` v `useEffect` při změně props.
+  const [draft, setDraft] = useState<SiteSettings | null>(null);
   const [saving, setSaving] = useState(false);
 
-  useEffect(() => {
-    setValues(settings);
-  }, [settings]);
+  const values = draft ?? settings;
 
   const dirty = useMemo(
-    () => settingsFingerprint(values) !== settingsFingerprint(settings),
-    [values, settings],
+    () => (draft ? settingsFingerprint(draft) !== settingsFingerprint(settings) : false),
+    [draft, settings],
   );
 
   const photoMap = new Map(availablePhotos.map((p) => [p.id, p]));
 
   function set<K extends keyof SiteSettings>(key: K, v: SiteSettings[K]) {
-    setValues((prev) => ({ ...prev, [key]: v }));
+    setDraft((prev) => ({ ...(prev ?? settings), [key]: v }));
   }
 
   async function save() {
@@ -92,6 +92,7 @@ export function SettingsEditor({ settings, availablePhotos, availableStories }: 
         return;
       }
       toast.success("Nastavení uloženo.");
+      setDraft(null);
       router.refresh();
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Uložení selhalo.");

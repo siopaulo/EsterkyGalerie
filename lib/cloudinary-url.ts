@@ -1,6 +1,14 @@
 /**
  * Klient-safe helpery pro Cloudinary URL.
  * Žádné secrets – pouze veřejný cloud name.
+ *
+ * Cíl tohoto souboru:
+ *  1) Centrální zdroj transformací – ať varianty (hero / gallery / card / lightbox)
+ *     nejsou rozházené po komponentách a ať jdou všude jednotně doladit.
+ *  2) Drží přijatelný počet variant pro Cloudinary Free plán –
+ *     jeden srcset = max ~5–6 šířek, žádné nadbytečné kroky.
+ *  3) Default `q_auto:good` pro hero/gallery (LCP) – řízená priorita kvality
+ *     bez agresivní komprese.
  */
 import { publicEnv } from "@/lib/env";
 import { log } from "@/lib/logger";
@@ -15,12 +23,19 @@ if (typeof window !== "undefined" && !CLOUD_NAME) {
   );
 }
 
+export type CldQuality =
+  | "auto"
+  | "auto:best"
+  | "auto:good"
+  | "auto:eco"
+  | "auto:low";
+
 export type CldVariant = {
   width?: number;
   height?: number;
   crop?: "fill" | "fit" | "limit" | "thumb";
   gravity?: "auto" | "face" | "faces" | "center";
-  quality?: "auto" | "auto:best" | "auto:good" | "auto:eco";
+  quality?: CldQuality;
   format?: "auto" | "jpg" | "webp" | "avif";
   blur?: number;
 };
@@ -72,7 +87,48 @@ export function cldBlur(publicId: string | null | undefined): string | null {
   return cldUrl(publicId, { width: 24, quality: "auto:eco", blur: 1000 });
 }
 
-export const GALLERY_WIDTHS = [320, 480, 640, 800, 1080, 1440];
-export const FULL_WIDTHS = [640, 960, 1280, 1600, 2000, 2400];
+// ---------- Centrální width sady ----------
+//
+// Drží minimální rozumnou množinu – čím více variant, tím více cache misses
+// při prvním fetchi a tím větší zátěž pro Cloudinary Free plán. Cílíme proto
+// na 4–6 šířek, které pokryjí běžné devices (320 → 2400) bez plýtvání.
+
+/** Karty / thumbnaily v gridech (např. galerie, photo_grid bloky). */
+export const CARD_WIDTHS: number[] = [400, 600, 800, 1100];
+
+/** Editorial gallery / image_carousel (zabírá ~30–55 vw). */
+export const GALLERY_WIDTHS: number[] = [480, 720, 1080, 1440];
+
+/** Hero / LCP – až do 2x retina na 1440 logicky širokém viewportu. */
+export const HERO_WIDTHS: number[] = [640, 960, 1280, 1600, 2000];
+
+/** Plný full-screen lightbox detail. */
+export const FULL_WIDTHS: number[] = [640, 960, 1280, 1600, 2000, 2400];
+
+// Default `sizes` pro hero LCP – konzistentní s tím, co používá HomeHeroCarousel
+// (text vlevo, foto vpravo na desktopu).
+export const HERO_SIZES_DEFAULT =
+  "(min-width: 1024px) 50vw, (min-width: 768px) 60vw, 100vw";
+
+// ---------- Variantní helpery ----------
+
+/**
+ * Hero / LCP variant: vyšší kvalita (q_auto:good), c_fill + g_auto pro stabilní
+ * crop a širší srcset (až 2000w pro retina).
+ */
+export function cldHeroSrcSet(
+  publicId: string | null | undefined,
+  widths: number[] = HERO_WIDTHS,
+): string {
+  if (!publicId || !CLOUD_NAME) return "";
+  return cldSrcSet(publicId, widths, {
+    crop: "fill",
+    gravity: "auto",
+    quality: "auto:good",
+  });
+}
+
+/** Alias pro use ve preload hint komponentě – stejné transformace jako hero. */
+export const buildHeroSrcSet = cldHeroSrcSet;
 
 export const CLOUDINARY_CONFIGURED = Boolean(CLOUD_NAME);

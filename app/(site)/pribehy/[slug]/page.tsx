@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { CloudinaryImage } from "@/components/shared/cloudinary-image";
+import { HeroPreloadHints } from "@/components/public/hero-preload-hints";
 import { Badge } from "@/components/ui/badge";
 import { BlockRenderer } from "@/features/blocks/render";
 import { collectPhotoIds } from "@/features/blocks/collect-ids";
@@ -10,7 +11,7 @@ import { fetchPhotosByIds } from "@/features/photos/queries";
 import { buildMetadata, jsonLd } from "@/lib/seo";
 import { getSiteSettings } from "@/features/site-settings/queries";
 import { formatDateCs } from "@/lib/utils";
-import { cldUrlOrNull } from "@/lib/cloudinary-url";
+import { cldUrlOrNull, HERO_WIDTHS } from "@/lib/cloudinary-url";
 
 export const revalidate = 120;
 
@@ -56,6 +57,14 @@ export default async function StoryPage({ params }: { params: Params }) {
 
   return (
     <article>
+      {data.cover ? (
+        <HeroPreloadHints
+          photo={data.cover}
+          // Cover je full-bleed v container-site (max ~80rem = 1280px),
+          // takže na velkých monitorech zabírá celých ~80vw.
+          sizes="(min-width: 1280px) 1280px, 100vw"
+        />
+      ) : null}
       <header className="container-site pt-14 pb-10 md:pt-20 md:pb-14">
         <nav aria-label="Breadcrumb" className="mb-6 text-sm text-muted-foreground">
           <ol className="flex flex-wrap items-center gap-2">
@@ -95,8 +104,11 @@ export default async function StoryPage({ params }: { params: Params }) {
               alt={data.cover.alt_text || data.story.title}
               aspectClass="aspect-[16/9]"
               variant={{ crop: "fill", gravity: "auto" }}
+              widths={HERO_WIDTHS}
               priority
-              sizes="100vw"
+              // Container je max ~1280px, takže nemá smysl tvrdit 100vw –
+              // prohlížeč by si stáhl zbytečně velkou variantu na FullHD+.
+              sizes="(min-width: 1280px) 1280px, 100vw"
             />
           </div>
         </div>
