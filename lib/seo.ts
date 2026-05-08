@@ -114,6 +114,7 @@ export function buildMetadata(input: BuildMetadataInput = {}): Metadata {
     stripLegacyBrandFromFreeText(descriptionRaw) || SITE_DEFAULTS.description;
   const path = input.path ?? "/";
   const url = absoluteUrl(path);
+  const usingDefaultImage = !input.image;
   const image = input.image || absoluteUrl(SITE_DEFAULTS.ogImage);
 
   return {
@@ -128,7 +129,19 @@ export function buildMetadata(input: BuildMetadataInput = {}): Metadata {
       title: ogTitle,
       description,
       siteName: brand,
-      images: image ? [{ url: image, width: 1200, height: 630 }] : undefined,
+      images: image
+        ? [
+            usingDefaultImage
+              ? {
+                  url: image,
+                  width: SITE_DEFAULTS.ogImageWidth,
+                  height: SITE_DEFAULTS.ogImageHeight,
+                  type: SITE_DEFAULTS.ogImageType,
+                  alt: brand,
+                }
+              : { url: image, width: 1200, height: 630 },
+          ]
+        : undefined,
     },
     twitter: {
       card: "summary_large_image",

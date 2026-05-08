@@ -4,6 +4,7 @@ import { useEffect, useRef, useState, type TouchEvent } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { CloudinaryImage } from "@/components/shared/cloudinary-image";
 import { HERO_WIDTHS, HERO_SIZES_DEFAULT, GALLERY_WIDTHS } from "@/lib/cloudinary-url";
+import { useCarouselVisibility } from "@/components/public/use-carousel-visibility";
 import { cn } from "@/lib/utils";
 import type { Photo } from "@/types/database";
 
@@ -26,16 +27,19 @@ export function HomeHeroCarousel({ photos, autoPlayMs = 5000 }: HomeHeroCarousel
   const [paused, setPaused] = useState(false);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const touchStartX = useRef<number | null>(null);
+  // Pauza autoplay mimo viewport / na hidden tab. CPU + baterie na mobilu;
+  // zároveň prevence "skoku" slidů při návratu na tab.
+  const { ref: visibilityRef, inView } = useCarouselVisibility<HTMLDivElement>();
 
   useEffect(() => {
-    if (safe.length <= 1 || paused || autoPlayMs <= 0) return;
+    if (safe.length <= 1 || paused || autoPlayMs <= 0 || !inView) return;
     timerRef.current = setInterval(() => {
       setIndex((i) => (i + 1) % safe.length);
     }, autoPlayMs);
     return () => {
       if (timerRef.current) clearInterval(timerRef.current);
     };
-  }, [safe.length, paused, autoPlayMs]);
+  }, [safe.length, paused, autoPlayMs, inView]);
 
   if (safe.length === 0) return null;
 
@@ -68,6 +72,7 @@ export function HomeHeroCarousel({ photos, autoPlayMs = 5000 }: HomeHeroCarousel
 
   return (
     <div
+      ref={visibilityRef}
       className="group/carousel relative touch-pan-y"
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}

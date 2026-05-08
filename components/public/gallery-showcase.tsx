@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState, type TouchEvent } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { CloudinaryImage } from "@/components/shared/cloudinary-image";
+import { useCarouselVisibility } from "@/components/public/use-carousel-visibility";
 import { cn } from "@/lib/utils";
 import type { Photo } from "@/types/database";
 
@@ -36,11 +37,14 @@ export function GalleryShowcase({
  */
 function EditorialLayout({ photos, autoPlayMs }: { photos: Photo[]; autoPlayMs: number }) {
   const groups = groupByN(photos, 3);
-  const { index, paused, handlers, goTo } = useAutoplay(groups.length, autoPlayMs);
+  const { index, paused, handlers, goTo, visibilityRef } = useAutoplay(
+    groups.length,
+    autoPlayMs,
+  );
   if (groups.length === 0) return null;
 
   return (
-    <div {...handlers} className="group/carousel relative touch-pan-y">
+    <div ref={visibilityRef} {...handlers} className="group/carousel relative touch-pan-y">
       <div className="relative grid gap-4 md:grid-cols-[1.6fr_1fr] md:gap-6">
         <div className="relative overflow-hidden rounded-md bg-muted aspect-[4/5] md:aspect-[4/5] lg:aspect-[5/6]">
           {groups.map(([main], i) => (
@@ -154,9 +158,9 @@ function EditorialLayout({ photos, autoPlayMs }: { photos: Photo[]; autoPlayMs: 
  * Minimalistický, žádné překryvy ani vedlejší prvky.
  */
 function FadeLayout({ photos, autoPlayMs }: { photos: Photo[]; autoPlayMs: number }) {
-  const { index, handlers, goTo } = useAutoplay(photos.length, autoPlayMs);
+  const { index, handlers, goTo, visibilityRef } = useAutoplay(photos.length, autoPlayMs);
   return (
-    <div {...handlers} className="group/carousel relative touch-pan-y">
+    <div ref={visibilityRef} {...handlers} className="group/carousel relative touch-pan-y">
       <div className="relative overflow-hidden rounded-md bg-muted aspect-[16/10] md:aspect-[21/9]">
         {photos.map((p, i) => (
           <div
@@ -280,16 +284,18 @@ function useAutoplay(total: number, autoPlayMs: number) {
   const [paused, setPaused] = useState(false);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const touchStartX = useRef<number | null>(null);
+  // Pauza autoplay mimo viewport a na hidden tab – ref se přiřazuje na obal carouselu.
+  const { ref, inView } = useCarouselVisibility<HTMLDivElement>();
 
   useEffect(() => {
-    if (total <= 1 || paused || autoPlayMs <= 0) return;
+    if (total <= 1 || paused || autoPlayMs <= 0 || !inView) return;
     timerRef.current = setInterval(() => {
       setIndex((i) => (i + 1) % total);
     }, autoPlayMs);
     return () => {
       if (timerRef.current) clearInterval(timerRef.current);
     };
-  }, [total, paused, autoPlayMs]);
+  }, [total, paused, autoPlayMs, inView]);
 
   const handlers = {
     onMouseEnter: () => setPaused(true),
@@ -318,6 +324,7 @@ function useAutoplay(total: number, autoPlayMs: number) {
   return {
     index,
     paused,
+    visibilityRef: ref,
     goTo: (i: number) => setIndex(((i % total) + total) % total),
     handlers,
   };

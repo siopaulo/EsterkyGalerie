@@ -31,7 +31,14 @@ export async function updatePageMetaAction(input: z.infer<typeof pageSchema>) {
 
   // revaliduj všechny statické stránky + homepage
   revalidatePath("/");
-  for (const p of ["o-mne", "sluzby", "cenik", "kontakt", "ochrana-osobnich-udaju"]) {
+  for (const p of [
+    "o-mne",
+    "sluzby",
+    "cenik",
+    "kontakt",
+    "novinky",
+    "ochrana-osobnich-udaju",
+  ]) {
     revalidatePath(`/${p}`);
   }
   revalidatePath("/studio/stranky");

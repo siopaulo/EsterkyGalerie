@@ -11,6 +11,7 @@ const STATIC = [
   { path: "/pribehy", priority: 0.8 },
   { path: "/cenik", priority: 0.7 },
   { path: "/reference", priority: 0.7 },
+  { path: "/novinky", priority: 0.6 },
   { path: "/kontakt", priority: 0.7 },
   { path: "/ochrana-osobnich-udaju", priority: 0.3 },
 ];

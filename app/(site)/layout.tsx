@@ -5,6 +5,7 @@ import { getSiteSettings } from "@/features/site-settings/queries";
 import { SITE_DEFAULTS } from "@/lib/constants";
 import { publicEnv } from "@/lib/env";
 import {
+  absoluteUrl,
   resolveSiteBrand,
   stripLegacyBrandFromFreeText,
   stripLegacyBrandFromTitle,
@@ -22,6 +23,12 @@ export async function generateMetadata(): Promise<Metadata> {
       settings.default_seo_description?.trim() || SITE_DEFAULTS.description,
     ) || SITE_DEFAULTS.description;
 
+  // Default OG/Twitter image pro stránky, které nedefinují vlastní `images`
+  // v `buildMetadata` (homepage, /galerie, /pribehy, /reference, /kontakt, …).
+  // Stories s vlastní cover fotkou si v `metadataForCmsPage` / story metadata
+  // přepíšou images na konkrétní Cloudinary URL.
+  const defaultImage = absoluteUrl(SITE_DEFAULTS.ogImage);
+
   return {
     metadataBase: new URL(publicEnv.siteUrl),
     title: {
@@ -33,10 +40,22 @@ export async function generateMetadata(): Promise<Metadata> {
       title: shareTitle,
       description,
       siteName,
+      locale: SITE_DEFAULTS.locale,
+      images: [
+        {
+          url: defaultImage,
+          width: SITE_DEFAULTS.ogImageWidth,
+          height: SITE_DEFAULTS.ogImageHeight,
+          type: SITE_DEFAULTS.ogImageType,
+          alt: siteName,
+        },
+      ],
     },
     twitter: {
+      card: "summary_large_image",
       title: shareTitle,
       description,
+      images: [defaultImage],
     },
   };
 }

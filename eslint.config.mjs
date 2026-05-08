@@ -10,6 +10,9 @@ const eslintConfig = [
       "out/**",
       ".netlify/**",
       ".pnpm-store/**",
+      // Audit / analytical artifakty – minifikované third-party JS,
+      // ESLint je nemá analyzovat (a ani nedává smysl).
+      ".unlighthouse/**",
       "types/database.generated.ts",
     ],
   },

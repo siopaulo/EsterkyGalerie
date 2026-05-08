@@ -43,8 +43,23 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       suppressHydrationWarning
     >
       <head>
-        <link rel="icon" type="image/png" href="/logo.png" />
-        <link rel="apple-touch-icon" href="/logo.png" />
+        {/*
+         * Favicon a apple-touch-icon spravuje Next.js přes konvenční soubory
+         * `app/icon.png` (32×32) a `app/apple-icon.png` (180×180). Manifest
+         * (`app/manifest.ts`) doplňuje 192/512 ikony pro PWA / Android.
+         */}
+        {/*
+         * Preconnect k Cloudinary CDN – DNS+TLS handshake se rozjede paralelně
+         * s parsováním HTML, takže LCP hero obrázek (přes `HeroPreloadHints`)
+         * začne stahování dřív. `crossOrigin="anonymous"` je nutné, protože
+         * `<img>` requesty na Cloudinary jdou bez credentials.
+         */}
+        <link
+          rel="preconnect"
+          href="https://res.cloudinary.com"
+          crossOrigin="anonymous"
+        />
+        <link rel="dns-prefetch" href="https://res.cloudinary.com" />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={jsonLd({

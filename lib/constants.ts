@@ -5,7 +5,15 @@ export const SITE_DEFAULTS = {
   description:
     "Editorial foto portfolio zaměřené na koně, portréty a přírodu. Autorka Esterka.",
   locale: "cs_CZ",
-  ogImage: "/og-default.svg",
+  /**
+   * Default OG image. Skutečný produkční JPG 1200×630 (povinný rozměr pro
+   * Facebook/Messenger/WhatsApp/iMessage/LinkedIn). Stories si zachovávají
+   * vlastní cover přes `metadataForCmsPage` / story metadata.
+   */
+  ogImage: "/og-default.jpg",
+  ogImageWidth: 1200,
+  ogImageHeight: 630,
+  ogImageType: "image/jpeg",
 } as const;
 
 export const PUBLIC_NAV = [
@@ -16,6 +24,7 @@ export const PUBLIC_NAV = [
   { href: "/galerie", label: "Galerie" },
   { href: "/cenik", label: "Ceník" },
   { href: "/reference", label: "Reference" },
+  { href: "/novinky", label: "Novinky" },
   { href: "/kontakt", label: "Kontakt" },
 ] as const;
 
