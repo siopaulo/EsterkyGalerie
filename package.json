@@ -1,6 +1,6 @@
 {
   "name": "esterky-fotky",
-  "version": "1.2.1",
+  "version": "1.2.2",
   "private": true,
   "description": "Fotografické portfolio – Next.js 16 + Supabase + Cloudinary",
   "scripts": {
