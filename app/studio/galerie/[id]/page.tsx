@@ -1,13 +1,18 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import Image from "next/image";
 import { AdminPageHeader } from "@/components/admin/page-header";
 import { PhotoEditor } from "@/components/admin/photo-editor";
 import { requireAdmin } from "@/lib/auth";
 import { createSupabaseAdmin } from "@/lib/supabase/admin";
-import { cldUrl } from "@/lib/cloudinary-url";
+import { cldUrl, cldSrcSet } from "@/lib/cloudinary-url";
 import { getPhotoUsage } from "@/features/photos/actions";
 import type { Photo, Tag } from "@/types/database";
+
+// Studio detail: jeden obrázek do levého sloupce. Na desktop ~ 50 vw až 700 px,
+// na mobilu plná šířka. Cloudinary URL serveme přímo (q_auto:good + f_auto),
+// vyhneme se /_next/image proxy + double-optimization a načítání je rychlejší.
+const ADMIN_DETAIL_WIDTHS = [480, 720, 960, 1200];
+const ADMIN_DETAIL_SIZES = "(min-width: 768px) 50vw, 100vw";
 
 type Params = Promise<{ id: string }>;
 
@@ -43,14 +48,18 @@ export default async function PhotoDetail({ params }: { params: Params }) {
       />
       <section className="grid max-w-full gap-10 px-4 py-8 md:grid-cols-[1fr_420px] md:px-10">
         <div className="min-w-0 overflow-hidden rounded-md border border-border bg-muted">
-          <Image
-            src={cldUrl((photo as Photo).cloudinary_public_id, { width: 1200 })}
+          <img
+            src={cldUrl((photo as Photo).cloudinary_public_id, { width: 1200, quality: "auto:good" })}
+            srcSet={cldSrcSet((photo as Photo).cloudinary_public_id, ADMIN_DETAIL_WIDTHS, { quality: "auto:good" })}
+            sizes={ADMIN_DETAIL_SIZES}
             alt={(photo as Photo).alt_text || (photo as Photo).display_name}
             width={Math.max(1, (photo as Photo).width ?? 1200)}
             height={Math.max(1, (photo as Photo).height ?? 800)}
+            loading="eager"
+            decoding="async"
+            fetchPriority="high"
+            draggable={false}
             className="h-auto w-full object-contain"
-            sizes="(min-width: 768px) 50vw, 100vw"
-            priority
           />
           <div className="border-t border-border bg-background p-4 text-xs text-muted-foreground">
             <p>

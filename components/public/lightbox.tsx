@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, type TouchEvent } from "react";
+import { useCallback, useEffect, useRef, type PointerEvent } from "react";
 import { ChevronLeft, ChevronRight, X } from "lucide-react";
 import { cldUrl, FULL_WIDTHS, cldSrcSet } from "@/lib/cloudinary-url";
 import type { PhotoWithTags } from "@/types/database";
@@ -22,52 +22,81 @@ export function Lightbox({ photos, index, onClose, onIndexChange }: LightboxProp
   const open = index !== null && index >= 0 && index < photos.length;
 
   const goPrev = useCallback(() => {
-    if (index === null) return;
+    if (index === null || photos.length <= 1) return;
     onIndexChange((index - 1 + photos.length) % photos.length);
   }, [index, photos.length, onIndexChange]);
 
   const goNext = useCallback(() => {
-    if (index === null) return;
+    if (index === null || photos.length <= 1) return;
     onIndexChange((index + 1) % photos.length);
   }, [index, photos.length, onIndexChange]);
 
+  // Klávesové zkratky + body scroll lock. Listener se re-attachuje, kdykoliv
+  // se mění goPrev / goNext (= když se změní `index`), aby uvnitř callbacku
+  // nečteme zastaralý index. Performance dopad je zanedbatelný (jeden listener),
+  // ale chování je deterministické i při rychlém ARROW spamování.
   useEffect(() => {
     if (!open) return;
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
-      if (e.key === "ArrowLeft") goPrev();
-      if (e.key === "ArrowRight") goNext();
+      if (e.key === "Escape") {
+        e.preventDefault();
+        onClose();
+        return;
+      }
+      if (e.key === "ArrowLeft") {
+        e.preventDefault();
+        goPrev();
+        return;
+      }
+      if (e.key === "ArrowRight") {
+        e.preventDefault();
+        goNext();
+      }
     };
     window.addEventListener("keydown", onKey);
+
+    // Body scroll lock – uložíme předchozí hodnotu, ať při zavření vrátíme
+    // přesně to, co tam bylo (např. když jiný overlay scroll lock už držel).
+    const prevOverflow = document.body.style.overflow;
+    const prevOverscroll = document.body.style.overscrollBehavior;
     document.body.style.overflow = "hidden";
+    document.body.style.overscrollBehavior = "contain";
+
     return () => {
       window.removeEventListener("keydown", onKey);
-      document.body.style.overflow = "";
+      document.body.style.overflow = prevOverflow;
+      document.body.style.overscrollBehavior = prevOverscroll;
     };
   }, [open, onClose, goPrev, goNext]);
 
-  // Touch swipe – ukládáme start point v ref, abychom se vyhnuli setState
-  // na každý touchmove a zbytečnému rerenderu.
-  const touchStart = useRef<{ x: number; y: number } | null>(null);
+  // Pointer-based swipe. ID gesto držíme v ref, ať vyřešíme pointer cancel
+  // / multi-touch a nevolal se goNext omylem dvakrát (např. když uživatel
+  // swipuje přes tlačítko – buttony si touchstart berou pro click, ale
+  // pointerdown bublá → správně rozhodneme až po pointerup podle dx).
+  const pointerStart = useRef<{ id: number; x: number; y: number } | null>(null);
 
-  const onTouchStart = useCallback((e: TouchEvent<HTMLDivElement>) => {
-    const t = e.touches[0];
-    if (!t) return;
-    touchStart.current = { x: t.clientX, y: t.clientY };
+  const onPointerDown = useCallback((e: PointerEvent<HTMLDivElement>) => {
+    // Bereme jen primární prst / myš / pen – ignorujeme druhý prst (pinch).
+    if (!e.isPrimary) return;
+    pointerStart.current = { id: e.pointerId, x: e.clientX, y: e.clientY };
   }, []);
 
-  const onTouchEnd = useCallback(
-    (e: TouchEvent<HTMLDivElement>) => {
-      const start = touchStart.current;
-      touchStart.current = null;
-      if (!start || photos.length <= 1) return;
-      const t = e.changedTouches[0];
-      if (!t) return;
-      const dx = t.clientX - start.x;
-      const dy = t.clientY - start.y;
-      // Když je vertikální posun moc velký, považujeme to za scroll → ignore.
-      if (Math.abs(dy) > SWIPE_VERTICAL_TOLERANCE) return;
+  const finishGesture = useCallback(
+    (e: PointerEvent<HTMLDivElement>) => {
+      const start = pointerStart.current;
+      if (!start || start.id !== e.pointerId) return;
+      pointerStart.current = null;
+      if (photos.length <= 1) return;
+      // Při drag-cancelu (pointercancel) považujeme gesto za zrušené.
+      if (e.type === "pointercancel") return;
+      const dx = e.clientX - start.x;
+      const dy = e.clientY - start.y;
+      // Klik na tlačítko / overlay – malý pohyb, žádný swipe. Click handler si
+      // to vyřídí sám (bublá z `onClick` na buttonu).
       if (Math.abs(dx) < SWIPE_THRESHOLD) return;
+      // Když je vertikální posun dominantní, považujeme to za scroll → ignore.
+      if (Math.abs(dy) > SWIPE_VERTICAL_TOLERANCE) return;
+      if (Math.abs(dy) > Math.abs(dx)) return;
       if (dx < 0) goNext();
       else goPrev();
     },
@@ -82,12 +111,13 @@ export function Lightbox({ photos, index, onClose, onIndexChange }: LightboxProp
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/95"
+      className="fixed inset-0 z-50 flex select-none items-center justify-center bg-black/95 [touch-action:pan-y]"
       role="dialog"
       aria-modal="true"
       aria-label={photo.alt_text || photo.display_name}
-      onTouchStart={onTouchStart}
-      onTouchEnd={onTouchEnd}
+      onPointerDown={onPointerDown}
+      onPointerUp={finishGesture}
+      onPointerCancel={finishGesture}
     >
       {/* Position counter (top-left) – nepřekrývá zavírací křížek vpravo nahoře. */}
       <div
@@ -112,7 +142,7 @@ export function Lightbox({ photos, index, onClose, onIndexChange }: LightboxProp
           <button
             type="button"
             onClick={goPrev}
-            className="absolute left-4 top-1/2 z-10 -translate-y-1/2 inline-flex h-12 w-12 items-center justify-center rounded-full bg-white/10 text-white transition-colors hover:bg-white/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
+            className="absolute left-3 top-1/2 z-10 -translate-y-1/2 inline-flex h-12 w-12 min-h-[44px] min-w-[44px] touch-manipulation items-center justify-center rounded-full bg-white/10 text-white transition-colors hover:bg-white/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white md:left-4"
             aria-label="Předchozí fotografie"
           >
             <ChevronLeft className="h-6 w-6" />
@@ -120,7 +150,7 @@ export function Lightbox({ photos, index, onClose, onIndexChange }: LightboxProp
           <button
             type="button"
             onClick={goNext}
-            className="absolute right-4 top-1/2 z-10 -translate-y-1/2 inline-flex h-12 w-12 items-center justify-center rounded-full bg-white/10 text-white transition-colors hover:bg-white/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
+            className="absolute right-3 top-1/2 z-10 -translate-y-1/2 inline-flex h-12 w-12 min-h-[44px] min-w-[44px] touch-manipulation items-center justify-center rounded-full bg-white/10 text-white transition-colors hover:bg-white/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white md:right-4"
             aria-label="Další fotografie"
           >
             <ChevronRight className="h-6 w-6" />

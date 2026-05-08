@@ -33,29 +33,11 @@ export default async function GdprPage() {
         <p className="mt-4 max-w-2xl whitespace-pre-line text-lg text-muted-foreground">{data.page.intro}</p>
       ) : null}
 
-      <div className="mx-auto mt-10 max-w-2xl prose-editorial">
-        {data && data.blocks.length > 0 ? (
+      {data && data.blocks.length > 0 ? (
+        <div className="mx-auto mt-10 max-w-2xl prose-editorial">
           <BlockRenderer blocks={data.blocks} photos={photoMap} />
-        ) : (
-          <>
-            <p>
-              Tento text popisuje, jak nakládám s osobními údaji návštěvníků webu a klientů. Vaše
-              údaje zpracovávám pouze v rozsahu nezbytném pro plnění dohodnuté služby a komunikaci.
-            </p>
-            <h2 className="mt-8 font-serif text-2xl">Jaké údaje zpracovávám</h2>
-            <p>Jméno, e-mail, případně telefon a obsah zprávy z kontaktního formuláře.</p>
-            <h2 className="mt-8 font-serif text-2xl">Proč je zpracovávám</h2>
-            <p>Pro odpověď na Váš dotaz a případnou realizaci focení.</p>
-            <h2 className="mt-8 font-serif text-2xl">Jak dlouho je uchovávám</h2>
-            <p>Pouze po dobu nutnou k vyřízení poptávky, nejdéle 3 roky.</p>
-            <h2 className="mt-8 font-serif text-2xl">Vaše práva</h2>
-            <p>
-              Máte právo na přístup, opravu, výmaz a námitku proti zpracování. Kontakt pro uplatnění
-              najdete v sekci Kontakt.
-            </p>
-          </>
-        )}
-      </div>
+        </div>
+      ) : null}
     </article>
   );
 }

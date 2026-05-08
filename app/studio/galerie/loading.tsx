@@ -17,8 +17,8 @@ export default function StudioGalleryLoading() {
           <Skeleton className="h-10 w-32" />
           <Skeleton className="ml-auto hidden h-4 w-24 sm:block" />
         </div>
-        <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-4 xl:grid-cols-5">
-          {Array.from({ length: 20 }).map((_, i) => (
+        <ul className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
+          {Array.from({ length: 15 }).map((_, i) => (
             <li key={i}>
               <PhotoCardSkeleton />
             </li>

@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import Image from "next/image";
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { Trash2 } from "lucide-react";
@@ -10,10 +9,18 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { ConfirmDialog } from "@/components/admin/confirm-dialog";
-import { cldUrl } from "@/lib/cloudinary-url";
+import { cldUrl, cldSrcSet } from "@/lib/cloudinary-url";
 import { formatDateCs } from "@/lib/utils";
 import { bulkSoftDeletePhotosAction } from "@/features/photos/actions";
 import type { Photo } from "@/types/database";
+
+// Studio admin: 2 sloupce na mobilu, 3 na sm, 5 na lg. Reálná šířka thumbnailu
+// nikdy nepřesáhne ~280 CSS px (lg), na mobilu ~360 CSS px. Renderujeme
+// ploché Cloudinary URL přímo (q_auto:eco + f_auto = AVIF/WebP), což přeskočí
+// /_next/image proxy a doručí zhruba 40 % méně bytů než public defaulty.
+const ADMIN_THUMB_WIDTHS = [320, 480, 640];
+const ADMIN_THUMB_SIZES =
+  "(min-width: 1024px) 20vw, (min-width: 640px) 33vw, 50vw";
 
 interface GalleryPhotoGridProps {
   photos: Photo[];
@@ -70,7 +77,14 @@ export function GalleryPhotoGrid({ photos, page }: GalleryPhotoGridProps) {
     <>
       <ul className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
         {photos.map((p, i) => {
-          const src = cldUrl(p.cloudinary_public_id, { width: 640, crop: "fill", gravity: "auto" });
+          const variant = {
+            crop: "fill" as const,
+            gravity: "auto" as const,
+            quality: "auto:eco" as const,
+          };
+          const src = cldUrl(p.cloudinary_public_id, { ...variant, width: 480 });
+          const srcSet = cldSrcSet(p.cloudinary_public_id, ADMIN_THUMB_WIDTHS, variant);
+          const eager = page === 1 && i < 6;
           const isOn = selected.has(p.id);
           return (
             <li key={p.id} className="relative">
@@ -89,14 +103,16 @@ export function GalleryPhotoGrid({ photos, page }: GalleryPhotoGridProps) {
                 className="group relative block overflow-hidden rounded-md bg-muted"
               >
                 <div className="relative aspect-[4/5] w-full">
-                  <Image
+                  <img
                     src={src}
+                    srcSet={srcSet || undefined}
+                    sizes={ADMIN_THUMB_SIZES}
                     alt={p.alt_text || p.display_name}
-                    fill
-                    sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 20vw"
-                    className="object-cover transition-transform group-hover:scale-[1.02]"
-                    loading={page === 1 && i < 6 ? "eager" : "lazy"}
-                    priority={page === 1 && i < 2}
+                    loading={eager ? "eager" : "lazy"}
+                    decoding="async"
+                    fetchPriority={page === 1 && i < 2 ? "high" : "auto"}
+                    draggable={false}
+                    className="absolute inset-0 h-full w-full object-cover transition-transform group-hover:scale-[1.02]"
                   />
                 </div>
                 <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 to-transparent p-3">

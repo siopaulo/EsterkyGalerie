@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useMemo } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import dynamic from "next/dynamic";
 import { usePathname, useSearchParams } from "next/navigation";
 import { PhotoCard } from "@/components/public/photo-card";
@@ -44,13 +44,37 @@ export function PhotoGridWithLightbox({ photos }: { photos: PhotoWithTags[] }) {
     return m;
   }, [photos]);
 
-  // Index lightboxu je odvozený přímo z URL – single source of truth.
-  // `window.history.pushState` / `replaceState` v Next.js 14.1+ synchronně
-  // probublají do `useSearchParams`, takže reakce po kliknutí je okamžitá
-  // a `popstate` (browser back / forward) zavře / přepne fotku přirozeně.
-  const urlPhotoId = searchParams.get(PHOTO_PARAM);
-  const indexFromUrl =
-    urlPhotoId && idToIndex.has(urlPhotoId) ? (idToIndex.get(urlPhotoId) ?? null) : null;
+  // Index lightboxu držíme jako lokální state (single source of truth pro UI),
+  // URL je jen odraz – sync probíhá přes window.history. Tento přístup chrání
+  // před race conditions, které dřív vznikaly tím, že `useSearchParams` dostalo
+  // novou hodnotu pomaleji než React stihl rerender (rapid arrow / swipe).
+  const initialId = searchParams.get(PHOTO_PARAM);
+  const initialIndex =
+    initialId && idToIndex.has(initialId) ? (idToIndex.get(initialId) ?? null) : null;
+  const [storedIndex, setStoredIndex] = useState<number | null>(initialIndex);
+
+  // Když se sada fotek mezitím změnila (nový search/tag), neukazuj lightbox
+  // pro fotku, která už není v aktuálním `photos` poli – derivujeme přímo
+  // z renderu, ať nevolaem setState v effectu.
+  const index =
+    storedIndex !== null && storedIndex >= 0 && storedIndex < photos.length
+      ? storedIndex
+      : null;
+
+  // Browser back/forward → reaguj na URL a zavři / přepni fotku přirozeně.
+  useEffect(() => {
+    function onPop() {
+      const url = new URL(window.location.href);
+      const id = url.searchParams.get(PHOTO_PARAM);
+      if (id && idToIndex.has(id)) {
+        setStoredIndex(idToIndex.get(id) ?? null);
+      } else {
+        setStoredIndex(null);
+      }
+    }
+    window.addEventListener("popstate", onPop);
+    return () => window.removeEventListener("popstate", onPop);
+  }, [idToIndex]);
 
   const updateUrl = useCallback(
     (id: string | null, replace: boolean) => {
@@ -72,6 +96,7 @@ export function PhotoGridWithLightbox({ photos }: { photos: PhotoWithTags[] }) {
       if (!photo) return;
       // pushState → otevření lightboxu si přidá entry do history,
       // browser back lightbox zavře (přirozené chování).
+      setStoredIndex(i);
       updateUrl(photo.id, false);
     },
     [photos, updateUrl],
@@ -81,14 +106,16 @@ export function PhotoGridWithLightbox({ photos }: { photos: PhotoWithTags[] }) {
     (i: number) => {
       const photo = photos[i];
       if (!photo) return;
-      // replaceState → procházení mezi fotkami uvnitř lightboxu
-      // nezahltí history. Back tak vede z lightboxu rovnou ven.
+      // replaceState → procházení mezi fotkami uvnitř lightboxu nezahltí history.
+      // Back tak vede z lightboxu rovnou ven.
+      setStoredIndex(i);
       updateUrl(photo.id, true);
     },
     [photos, updateUrl],
   );
 
   const close = useCallback(() => {
+    setStoredIndex(null);
     updateUrl(null, false);
   }, [updateUrl]);
 
@@ -110,10 +137,10 @@ export function PhotoGridWithLightbox({ photos }: { photos: PhotoWithTags[] }) {
           </li>
         ))}
       </ul>
-      {indexFromUrl !== null ? (
+      {index !== null ? (
         <Lightbox
           photos={photos}
-          index={indexFromUrl}
+          index={index}
           onClose={close}
           onIndexChange={change}
         />
