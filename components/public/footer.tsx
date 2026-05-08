@@ -2,6 +2,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { Instagram, Facebook, Mail, Phone } from "lucide-react";
 import type { SiteSettings } from "@/types/database";
+import { APP_VERSION_LABEL } from "@/lib/version";
 
 export function PublicFooter({ settings }: { settings: SiteSettings }) {
   const year = new Date().getFullYear();
@@ -94,7 +95,17 @@ export function PublicFooter({ settings }: { settings: SiteSettings }) {
       </div>
       <div className="border-t border-border">
         <div className="container-site py-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 text-xs text-muted-foreground">
-          <p>© {year} {settings.site_name}. Všechna práva vyhrazena.</p>
+          <p className="flex flex-wrap items-center gap-x-2 gap-y-1">
+            <span>© {year} {settings.site_name}. Všechna práva vyhrazena.</span>
+            <span aria-hidden="true" className="hidden sm:inline text-muted-foreground/50">·</span>
+            <span
+              className="font-mono text-[11px] tracking-wide text-muted-foreground/70"
+              aria-label={`Verze aplikace ${APP_VERSION_LABEL}`}
+              title={`Verze aplikace ${APP_VERSION_LABEL}`}
+            >
+              {APP_VERSION_LABEL}
+            </span>
+          </p>
           <p>
             Vytvořil{" "}
             <a

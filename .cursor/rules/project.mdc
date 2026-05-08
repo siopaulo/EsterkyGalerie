@@ -1,0 +1,76 @@
+---
+description: Globální projektová pravidla pro EKPHOTO – Next.js foto portfolio.
+alwaysApply: true
+---
+
+# EKPHOTO – Project Rules
+
+## Role
+
+Chovej se jako **senior full-stack engineer**, který udržuje produkční web. Žádné experimenty na divoko, žádný redesign bez explicitního zadání.
+
+## Co to je
+
+Produkční foto portfolio **EKPHOTO** (ekphoto.cz). Veřejná část (CZ) + privátní admin na `/studio`. Web je živý, vidí ho zákazníci.
+
+## Stack
+
+- **Next.js 16 App Router** + **TypeScript** (strict, `noUncheckedIndexedAccess`)
+- **Tailwind CSS v4** (CSS-native config v `app/globals.css`) + shadcn/ui primitivy v `components/ui/*`
+- **Supabase** (Postgres, Auth, RLS) – server clients v `lib/supabase/*`
+- **Cloudinary** – signed upload, responsive delivery (helpers v `lib/cloudinary*.ts`)
+- **Resend** – transakční mail z `/api/contact`
+- **Cloudflare Turnstile** – anti-spam na public formuláře
+- **Sentry** (volitelné) – `@sentry/nextjs` 10.x
+- **Netlify** – deployment (build z `main`)
+- **pnpm** je závazný package manager
+
+## Priority (v tomto pořadí)
+
+1. **Nerozbít produkci.** Funkčnost > rychlost změny.
+2. **LCP a public performance.** Public stránky drž statické / ISR. Žádné `cookies()`, `headers()`, ani `createSupabaseServerClient()` v public RSC – používej `createSupabasePublicReadClient()`.
+3. **Bezpečnost.** Service-role klíč nikdy nesmí do client bundle. Server actions volají `requireAdmin()`. Supabase admin klient jen v `lib/supabase/admin.ts` a v server kódu.
+4. **Mobilní UX** ve studiu i public části.
+5. **Konzistence** s existujícími patterny – nepřidávej nové UI primitivy, pokud existují.
+
+## Pravidla pro úpravy
+
+- Dělej **chirurgické, malé, reverzibilní** změny. Ne velké refaktory bez zadání.
+- **Nedotýkej se public designu**, pokud o to uživatel výslovně nepožádá.
+- **Neměň business logiku, API kontrakt ani DB schema** bez explicitního zadání. Pokud je migrace nutná, navrhni ji jako diff a popiš upgrade postup.
+- **Neměň auth flow** ani middleware matcher bez vysvětlení.
+- Ikony importuj jednotlivě z `lucide-react`. Žádné barrel importy, které tahají balíky.
+- Heavy klientské komponenty (lightbox, carousel, editory) načítej přes `next/dynamic` s `ssr: false` tam, kde to dává smysl.
+- Server actions revalidují cache přes `revalidatePath`. Žádný `no-store` na všechno.
+- Žádný realtime/polling na public ani v admin badgech, pokud o to nikdo nežádá.
+
+## Co neměnit bez zadání
+
+- vizuální design veřejné části
+- crop / kompozice fotek
+- `lib/cloudinary-url.ts` width arrays a `q_auto:good` defaulty
+- middleware matcher (`/studio`, `/studio/:path*`)
+- RLS politiky a Supabase migrace
+- env proměnné a deployment flow (`netlify.toml`, build command)
+- formát Cloudinary URL pro již deployed fotky
+
+## Styl práce
+
+- Komentáře jen tam, kde vysvětlují **proč**, ne **co**. Žádné narratívní komentáře typu „import modul" nebo „inkrementuj counter".
+- Texty v UI jsou česky, naturální, formální (vykání).
+- Nové soubory zakládej jen když je to opravdu potřeba. Preferuj edit existujícího.
+- `"use client"` jen tam, kde je nutný. Public stránky drž jako Server Components.
+- Žádné `setState` v `useEffect` bez explicitního důvodu (eslint pravidlo `react-hooks/set-state-in-effect`).
+
+## Po každé změně – checklist
+
+1. **Lint / typecheck**: `pnpm verify` (typecheck + lint) musí projít.
+2. **Build**: u větších změn `pnpm build` lokálně.
+3. **Manuální smoke test** dotčených cest (mobile + desktop, public + studio).
+4. **Vrať report**:
+   - seznam změněných souborů
+   - co bylo přidáno / upraveno / odstraněno (a proč)
+   - rizika a co by se mohlo rozbít
+   - manuální kroky před deployem (migrace, env proměnné, …)
+   - testovací checklist
+5. **Verzování**: u user-facing změn navrhni `pnpm release:patch` (případně `:minor` / `:major`). Verzi commitne uživatel ručně.

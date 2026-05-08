@@ -4,9 +4,16 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { ExternalLink, LogOut } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { ADMIN_STUDIO_NAV } from "@/lib/admin-studio-nav";
+import { ADMIN_STUDIO_NAV, type StudioBadges } from "@/lib/admin-studio-nav";
+import { StudioNavBadge } from "@/components/admin/studio-nav-badge";
 
-export function AdminSidebar({ userEmail }: { userEmail?: string | null }) {
+export function AdminSidebar({
+  userEmail,
+  badges,
+}: {
+  userEmail?: string | null;
+  badges?: StudioBadges;
+}) {
   const pathname = usePathname();
   return (
     <aside className="hidden border-r border-border bg-background md:flex md:w-64 md:shrink-0 md:flex-col">
@@ -21,6 +28,7 @@ export function AdminSidebar({ userEmail }: { userEmail?: string | null }) {
             const active = item.exact
               ? pathname === item.href
               : pathname.startsWith(item.href);
+            const count = item.badgeKey ? badges?.[item.badgeKey] ?? 0 : 0;
             return (
               <li key={item.href}>
                 <Link
@@ -32,8 +40,9 @@ export function AdminSidebar({ userEmail }: { userEmail?: string | null }) {
                       : "text-foreground/70 hover:bg-muted hover:text-foreground",
                   )}
                 >
-                  <item.Icon className="h-4 w-4" />
-                  {item.label}
+                  <item.Icon className="h-4 w-4 shrink-0" />
+                  <span className="flex-1 truncate">{item.label}</span>
+                  {count > 0 ? <StudioNavBadge count={count} /> : null}
                 </Link>
               </li>
             );
@@ -58,7 +67,7 @@ export function AdminSidebar({ userEmail }: { userEmail?: string | null }) {
         <form action="/studio/logout" method="post">
           <button
             type="submit"
-            className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-sm text-foreground/70 hover:bg-muted hover:text-foreground"
+            className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-sm text-red-700 transition-colors hover:bg-red-50 hover:text-red-800"
           >
             <LogOut className="h-4 w-4" />
             Odhlásit

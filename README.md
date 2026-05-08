@@ -165,15 +165,37 @@ Block engine v `features/blocks/` definuje:
 ## Skripty
 
 ```
-pnpm dev          # lokální server
-pnpm verify       # typecheck + lint (doporučeno před pushnutím)
-pnpm build        # produkční build
-pnpm start        # produkční server
-pnpm lint         # ESLint
-pnpm typecheck    # tsc --noEmit
-pnpm format       # Prettier
-pnpm db:types     # generovat DB typy
+pnpm dev            # lokální server
+pnpm verify         # typecheck + lint (doporučeno před pushnutím)
+pnpm build          # produkční build
+pnpm start          # produkční server
+pnpm lint           # ESLint
+pnpm typecheck      # tsc --noEmit
+pnpm format         # Prettier
+pnpm db:types       # generovat DB typy
+pnpm release:patch  # bump patch verze (1.1.2 → 1.1.3)
+pnpm release:minor  # bump minor verze (1.1.2 → 1.2.0)
+pnpm release:major  # bump major verze (1.1.2 → 2.0.0)
 ```
+
+## Release / versioning
+
+Verze aplikace je jediná, **`package.json` je source-of-truth**. Helper `lib/version.ts` ji čte při buildu (přes `resolveJsonModule`) a vystavuje jako `APP_VERSION` / `APP_VERSION_LABEL`. Footer veřejné části zobrazuje aktuální verzi formátem `v1.1.2`.
+
+Workflow při vydání nové verze:
+
+1. `pnpm release:patch` (případně `:minor` / `:major`) – zvýší verzi v `package.json` a `pnpm-lock.yaml`. **Žádný auto-commit, žádný auto-tag, žádný auto-push.**
+2. `pnpm verify && pnpm build` – ověř lokálně.
+3. `git add package.json pnpm-lock.yaml && git commit -m "chore(release): vX.Y.Z"`
+4. `git push` – Netlify nasadí novou verzi z `main`.
+
+Pravidla:
+
+- `patch` – bugfixy, drobné UI úpravy, performance polish (např. 1.1.2 → 1.1.3)
+- `minor` – nové funkce zpětně kompatibilní (1.1.2 → 1.2.0)
+- `major` – breaking změny (1.1.2 → 2.0.0)
+
+Žádný changelog generator ani GitHub Actions — verze se bumpne ručně.
 
 ## Privacy a GDPR
 

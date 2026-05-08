@@ -4,7 +4,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
-import { Menu, X } from "lucide-react";
+import { Lock, Menu, X } from "lucide-react";
 import { PUBLIC_NAV } from "@/lib/constants";
 import { cn } from "@/lib/utils";
 
@@ -106,6 +106,20 @@ export function PublicHeader({ siteName, tagline }: HeaderProps) {
                 </li>
               );
             })}
+            <li
+              aria-hidden="true"
+              className="mx-1 h-4 w-px bg-border/70"
+            />
+            <li>
+              <Link
+                href="/studio"
+                className="inline-flex items-center gap-1.5 rounded-full px-3 py-2 text-xs uppercase tracking-[0.18em] text-muted-foreground/80 transition-colors hover:text-foreground"
+                aria-label="Studio (administrace)"
+              >
+                <Lock className="h-3 w-3" aria-hidden />
+                Studio
+              </Link>
+            </li>
           </ul>
         </nav>
 
@@ -144,6 +158,17 @@ export function PublicHeader({ siteName, tagline }: HeaderProps) {
                   </li>
                 );
               })}
+              <li className="mt-2 border-t border-border pt-2">
+                <Link
+                  href="/studio"
+                  onClick={() => setMobileOpen(false)}
+                  className="flex items-center gap-2 rounded-md px-3 py-2 text-xs uppercase tracking-[0.18em] text-muted-foreground/80 hover:bg-muted hover:text-foreground"
+                  aria-label="Studio (administrace)"
+                >
+                  <Lock className="h-3.5 w-3.5" aria-hidden />
+                  Studio
+                </Link>
+              </li>
             </ul>
           </nav>
         </div>

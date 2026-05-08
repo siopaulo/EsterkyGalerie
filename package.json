@@ -1,6 +1,6 @@
 {
   "name": "esterky-fotky",
-  "version": "0.1.0",
+  "version": "1.1.2",
   "private": true,
   "description": "Fotografické portfolio – Next.js 16 + Supabase + Cloudinary",
   "scripts": {
@@ -13,7 +13,10 @@
     "format": "prettier --write .",
     "analyze": "ANALYZE=true next build",
     "db:types": "supabase gen types typescript --linked > types/database.generated.ts",
-    "email:test": "node --env-file=.env.local scripts/send-test-email.mjs"
+    "email:test": "node --env-file=.env.local scripts/send-test-email.mjs",
+    "release:patch": "npm version patch --no-git-tag-version",
+    "release:minor": "npm version minor --no-git-tag-version",
+    "release:major": "npm version major --no-git-tag-version"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.1",
