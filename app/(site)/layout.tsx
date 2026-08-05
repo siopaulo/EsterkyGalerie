@@ -6,6 +6,7 @@ import { SITE_DEFAULTS } from "@/lib/constants";
 import { publicEnv } from "@/lib/env";
 import {
   absoluteUrl,
+  capitalizeShareTitle,
   resolveSiteBrand,
   stripLegacyBrandFromFreeText,
   stripLegacyBrandFromTitle,
@@ -16,8 +17,9 @@ export async function generateMetadata(): Promise<Metadata> {
   const siteName = resolveSiteBrand(settings.site_name);
   /** V záložce preferuj krátký název webu; dlouhý „výchozí title“ nech pro OG/sdílení. */
   const tabDefault = siteName;
-  const shareTitle =
-    stripLegacyBrandFromTitle(settings.default_seo_title?.trim() || "") || siteName;
+  const shareTitle = capitalizeShareTitle(
+    stripLegacyBrandFromTitle(settings.default_seo_title?.trim() || "") || siteName,
+  );
   const description =
     stripLegacyBrandFromFreeText(
       settings.default_seo_description?.trim() || SITE_DEFAULTS.description,

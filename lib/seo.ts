@@ -7,6 +7,13 @@ export function resolveSiteBrand(siteName?: string | null): string {
   return siteName?.trim() || SITE_DEFAULTS.name;
 }
 
+/** První písmeno velké (OG/sdílení – „fotografie…“ → „Fotografie…“). */
+export function capitalizeShareTitle(input: string): string {
+  const s = input.trim();
+  if (!s) return s;
+  return s.charAt(0).toLocaleUpperCase("cs") + s.slice(1);
+}
+
 /** Odstraní zastaralý seed placeholder značky z titulků (včetně skládání „| značka“). */
 export function stripLegacyBrandFromTitle(input: string): string {
   let s = input.trim();
@@ -97,9 +104,11 @@ export function buildMetadata(input: BuildMetadataInput = {}): Metadata {
 
   const ogTitle = (() => {
     if (!rawTitle) return brand;
-    if (input.titleIsAbsolute) return rawTitle;
-    if (input.useTitleTemplate && segmentForOg) return `${segmentForOg} | ${brand}`;
-    if (rawTitle) return `${rawTitle} | ${brand}`;
+    if (input.titleIsAbsolute) return capitalizeShareTitle(rawTitle);
+    if (input.useTitleTemplate && segmentForOg) {
+      return `${capitalizeShareTitle(segmentForOg)} | ${brand}`;
+    }
+    if (rawTitle) return `${capitalizeShareTitle(rawTitle)} | ${brand}`;
     return brand;
   })();
 
